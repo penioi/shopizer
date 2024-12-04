@@ -2,6 +2,7 @@ package com.salesmanager.shop.store.controller.product.facade;
 
 import java.util.List;
 
+import com.salesmanager.shop.model.catalog.product.attribute.PersistableProductOption;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -57,5 +58,6 @@ public interface ProductOptionFacade {
   ReadableProductAttributeList getAttributesList(Long productId, MerchantStore store, Language language, int page, int count);
   
   void deleteAttribute(Long productId, Long attributeId, MerchantStore store);
-  
+
+  void saveOption(PersistableProductOption option, MerchantStore merchantStore);
 }

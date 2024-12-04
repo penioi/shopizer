@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.salesmanager.shop.mapper.catalog.PersistableProductOptionMapper;
+import com.salesmanager.shop.model.catalog.product.attribute.PersistableProductOption;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jsoup.helper.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,7 @@ import com.salesmanager.core.model.content.InputContentFile;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.mapper.catalog.PersistableProductAttributeMapper;
-import com.salesmanager.shop.mapper.catalog.PersistableProductOptionMapper;
+import com.salesmanager.shop.mapper.catalog.PersistableProductOptionEntityMapper;
 import com.salesmanager.shop.mapper.catalog.PersistableProductOptionValueMapper;
 import com.salesmanager.shop.mapper.catalog.ReadableProductAttributeMapper;
 import com.salesmanager.shop.mapper.catalog.ReadableProductOptionMapper;
@@ -58,7 +60,10 @@ public class ProductOptionFacadeImpl implements ProductOptionFacade {
 	private ReadableProductOptionMapper readableMapper;
 
 	@Autowired
-	private PersistableProductOptionMapper persistableeMapper;
+	private PersistableProductOptionEntityMapper persistableeMapper;
+
+	@Autowired
+	private PersistableProductOptionMapper persistableOptionMapper;
 
 	@Autowired
 	private PersistableProductOptionValueMapper persistableOptionValueMapper;
@@ -108,6 +113,30 @@ public class ProductOptionFacadeImpl implements ProductOptionFacade {
 		return readable;
 
 	}
+
+
+	@Override
+	public void saveOption(PersistableProductOption option, MerchantStore store) {
+		Validate.notNull(option, "ProductOption cannot be null");
+		Validate.notNull(store, "MerchantStore cannot be null");
+
+		ProductOption optionModel = new ProductOption();
+		if (option.getId() != null && option.getId() > 0) {
+			optionModel = productOptionService.getById(store, option.getId());
+			if (optionModel == null) {
+				throw new ResourceNotFoundException(
+						"ProductOption not found for if [" + option.getId() + "] and store [" + store.getCode() + "]");
+			}
+		}
+
+		optionModel = persistableOptionMapper.merge(option, optionModel, store, null);
+		try {
+			productOptionService.saveOrUpdate(optionModel);
+		} catch (ServiceException e) {
+			throw new ServiceRuntimeException("An exception occured while saving ProductOption", e);
+		}
+	}
+
 
 	@Override
 	public void deleteOption(Long optionId, MerchantStore store) {

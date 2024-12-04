@@ -37,7 +37,7 @@ import com.salesmanager.shop.filter.XssFilter;
 import com.salesmanager.shop.utils.LabelUtils;
 
 @Configuration
-@ComponentScan({"com.salesmanager.shop"})
+@ComponentScan({"com.salesmanager.shop", "com.shopizer.archive"})
 @ServletComponentScan
 @Import({CoreApplicationConfiguration.class}) // import sm-core configurations
 @EnableWebSecurity

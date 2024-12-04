@@ -72,7 +72,7 @@ public class PersistableCategoryPopulator extends
 
 		//get parent
 
-		if(source.getParent()==null || (StringUtils.isBlank(source.getParent().getCode())) || source.getParent().getId()==null) {
+		if(source.getParent() == null || (StringUtils.isBlank(source.getParent().getCode())) || source.getParent().getId() == null) {
 			target.setParent(null);
 			target.setDepth(0);
 			target.setLineage(new StringBuilder().append("/").append(source.getId()).append("/").toString());

@@ -463,10 +463,10 @@ public class ContentApi {
 	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
 
-	public void updatePage(@PathVariable Long id, @RequestBody @Valid PersistableContentEntity page,
-			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
+	public void updatePage(@PathVariable Long id, @RequestBody @Valid PersistableContentPage page,
+						   @ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
 		page.setId(id);
-		//contentFacade.saveContentPage(page, merchantStore, language);
+		contentFacade.saveContentPage(page, merchantStore, language);
 	}
 
 	/**

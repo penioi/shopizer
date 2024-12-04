@@ -184,7 +184,7 @@ public class ProductVariationApi {
   }
 
 	@ResponseStatus(HttpStatus.CREATED)
-	@RequestMapping(value = { "/private/product/variation" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/private/products/variation" }, method = RequestMethod.POST)
 	@ApiOperation(
 		      httpMethod = "POST",
 		      value = "Creates a new product variant",
@@ -204,7 +204,7 @@ public class ProductVariationApi {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = { "/private/product/variation/unique" }, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = { "/private/products/variation/unique" }, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiImplicitParams({ 
 		@ApiImplicitParam(name = "store", dataType = "string", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "string", defaultValue = "en") })
@@ -220,7 +220,7 @@ public class ProductVariationApi {
 
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = { "/private/product/variation/{variationId}" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/private/products/variation/{variationId}" }, method = RequestMethod.GET)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
 	@ResponseBody
@@ -235,7 +235,7 @@ public class ProductVariationApi {
 
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = { "/private/product/variation/{variationId}" }, method = RequestMethod.PUT)
+	@RequestMapping(value = { "/private/products/variation/{variationId}" }, method = RequestMethod.PUT)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
 	public void update(
@@ -251,7 +251,7 @@ public class ProductVariationApi {
 
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = { "/private/product/variation/{variationId}" }, method = RequestMethod.DELETE)
+	@RequestMapping(value = { "/private/products/variation/{variationId}" }, method = RequestMethod.DELETE)
 	@ApiImplicitParams({ 
 		@ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
@@ -266,7 +266,7 @@ public class ProductVariationApi {
 	
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = { "/private/product/variations" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/private/products/variations" }, method = RequestMethod.GET)
 	@ApiImplicitParams({ 
 		@ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })

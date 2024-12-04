@@ -153,7 +153,27 @@ public class ProductFacadeImpl implements ProductFacade {
 
 		return productList;
 	}
-	
+
+	@Override
+	public ReadableProduct getProductById(MerchantStore store, Long id, Language language) {
+
+		Product product = null;
+		try {
+			product = productService.retrieveById(id, store).orElseThrow(() -> new ServiceException("Product not found!"));
+		} catch (ServiceException e) {
+			throw new ServiceRuntimeException(e);
+		}
+
+		ReadableProductPopulator populator = new ReadableProductPopulator();
+
+		populator.setPricingService(pricingService);
+		populator.setimageUtils(imageUtils);
+		try {
+			return populator.populate(product, null, product.getMerchantStore(), language);
+		} catch (ConversionException e) {
+			throw new ConversionRuntimeException("Product with code [" + id + "] cannot be converted", e);
+		}
+	}
 	@Override
 	public ReadableProduct getProductByCode(MerchantStore store, String uniqueCode, Language language) {
 

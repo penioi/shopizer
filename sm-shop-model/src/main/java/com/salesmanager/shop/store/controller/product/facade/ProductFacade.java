@@ -14,15 +14,26 @@ import com.salesmanager.shop.model.catalog.product.ReadableProductPrice;
 public interface ProductFacade {
 
 
-  
-  
+
+
   /**
-   * 
+   *
    * @param id
    * @param store
    * @return
    */
   Product getProduct(Long id, MerchantStore store);
+
+  /**
+   * Reads a product by code
+   *
+   * @param store
+   * @param id
+   * @param language
+   * @return
+   * @throws Exception
+   */
+  ReadableProduct getProductById(MerchantStore store, Long id, Language language);
 
   /**
    * Reads a product by code

@@ -38,6 +38,11 @@
 			<artifactId>sm-shop-model</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.shopizer</groupId>
+			<artifactId>sm-archive</artifactId>
+		</dependency>
+
 		<!-- Spring boot starters -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -359,8 +359,7 @@ public class ProductApi {
 	 *                   <p>
 	 *                   /api/product/123
 	 */
-	@RequestMapping(value = { "/product/{friendlyUrl}",
-			"/product/friendly/{friendlyUrl}" }, method = RequestMethod.GET)
+	@RequestMapping(value = {"/product/friendly/{friendlyUrl}" }, method = RequestMethod.GET)
 	@ApiOperation(httpMethod = "GET", value = "Get a product by friendlyUrl (slug)", notes = "For administration and shop purpose. Specifying ?merchant is "
 			+ "required otherwise it falls back to DEFAULT")
 	@ApiResponses(value = {
@@ -378,6 +377,33 @@ public class ProductApi {
 			return null;
 		}
 
+		return product;
+	}
+
+
+	/**
+	 * API for getting a product using sku in v2
+	 *
+	 * @param sku
+	 * @param lang     ?lang=fr|en|...
+	 * @param response
+	 * @return ReadableProduct
+	 * @throws Exception
+	 *                   <p>
+	 *                   /api/products/sku
+	 */
+	@RequestMapping(value = "/product/{id}", method = RequestMethod.GET)
+	@ApiOperation(httpMethod = "GET", value = "Get a product by sku", notes = "For Shop purpose. Specifying ?merchant is required otherwise it falls back to DEFAULT")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Single product found", response = ReadableProduct.class) })
+	@ResponseBody
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+	public ReadableProduct get(@PathVariable final Long id,
+							   @RequestParam(value = "lang", required = false) String lang,
+							   @ApiIgnore MerchantStore merchantStore,
+							   @ApiIgnore Language language) {
+		ReadableProduct product = productFacade.getProductById(merchantStore, id, language);
 		return product;
 	}
 

@@ -45,7 +45,7 @@ public class ProductOption extends SalesManagerEntity<Long, ProductOption> {
 	@Column(name="PRODUCT_OPTION_SORT_ORD")
 	private Integer productOptionSortOrder;
 	
-	@Column(name="PRODUCT_OPTION_TYPE", length=10)
+	@Column(name="PRODUCT_OPTION_TYPE")
 	private String productOptionType;
 	
 

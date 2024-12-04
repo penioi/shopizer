@@ -700,10 +700,10 @@ public class ContentFacadeImpl implements ContentFacade {
 			Content content = null;
 
 			content = contentService.getByCode(page.getCode(), merchantStore);
-			if (content != null) {
-				throw new ConstraintException("Page with code [" + page.getCode() + "] already exist for store ["
-						+ merchantStore.getCode() + "]");
-			}
+//			if (content != null) {
+//				throw new ConstraintException("Page with code [" + page.getCode() + "] already exist for store ["
+//						+ merchantStore.getCode() + "]");
+//			}
 
 			content = convertContentPageToContent(merchantStore, content, page);
 			contentService.saveOrUpdate(content);

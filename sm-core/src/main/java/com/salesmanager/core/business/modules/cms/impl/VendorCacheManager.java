@@ -33,6 +33,9 @@ public class VendorCacheManager {
 
 
   public EmbeddedCacheManager getManager() {
+    if(manager == null) {
+      manager = new DefaultCacheManager();
+    }
     return manager;
   }
 

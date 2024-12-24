@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Map; 
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,10 +23,12 @@ public class ProductOptionValuesParser implements CatalogParser<PersistableProdu
             PersistableProductOptionValue ppov = new PersistableProductOptionValue();
             ppov.setId(null);
             ppov.setCode(value.get("code"));
-            ppov.setDescriptions(store.getLanguages().stream().filter(l -> value.isSet("description_" + l.getCode()))
+            ppov.setImage(value.get("image"));
+            ppov.setDescriptions(store.getLanguages().stream().filter(l -> value.hasValue("name_" + l.getCode()))
                     .map(l -> {
                         ProductOptionValueDescription description = new ProductOptionValueDescription();
-                        description.setName(value.get("description_" + l.getCode()));
+                        description.setName(value.get("name_" + l.getCode()));
+                        description.setDescription(value.get("description_" + l.getCode()));
                         description.setLanguage(l.getCode());
                         return description;
                     }).collect(Collectors.toList()));

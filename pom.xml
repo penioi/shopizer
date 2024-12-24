@@ -5,7 +5,7 @@
 	<groupId>com.shopizer</groupId>
 	<artifactId>shopizer</artifactId>
 	<packaging>pom</packaging>
-	<version>3.2.5</version>
+	<version>3.2.6-SNAPSHOT</version>
 
 	<name>shopizer</name>
 	<url>http://www.shopizer.com</url>
@@ -35,8 +35,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<!--java version -->
-		<java.version>11</java.version>
+		<!--java version-->
+		<java.version>17</java.version>
 
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
@@ -97,27 +97,27 @@
 			<dependency>
 				<groupId>com.shopizer</groupId>
 				<artifactId>sm-core</artifactId>
-				<version>3.2.5</version>
+				<version>3.2.6-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.shopizer</groupId>
 				<artifactId>sm-core-model</artifactId>
-				<version>3.2.5</version>
+				<version>3.2.6-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.shopizer</groupId>
 				<artifactId>sm-core-modules</artifactId>
-				<version>3.2.5</version>
+				<version>3.2.6-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.shopizer</groupId>
 				<artifactId>sm-shop-model</artifactId>
-				<version>3.2.5</version>
+				<version>3.2.6-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.shopizer</groupId>
 				<artifactId>sm-archive</artifactId>
-				<version>3.2.5</version>
+				<version>3.2.6-SNAPSHOT</version>
 			</dependency>
 
 			<!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->

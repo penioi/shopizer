@@ -373,7 +373,7 @@ public class OrderApi {
 			order.setCustomerId(customer.getId());//That is an existing customer purchasing
 
 			Order modelOrder = orderFacade.processOrder(order, customer, merchantStore, language, locale);
-			Long orderId = modelOrder.getId();
+				Long orderId = modelOrder.getId();
 			modelOrder.setId(orderId);
 
 

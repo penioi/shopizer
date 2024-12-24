@@ -22,6 +22,7 @@ import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.controller.catalog.facade.CatalogFacade;
 import org.jsoup.helper.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,7 @@ public class CatalogFacadeImpl implements CatalogFacade {
     @Autowired
     private ReadableCatalogMapper readableCatalogMapper;
 
+    @Lazy
     @Autowired
     private Mapper<PersistableCatalogCategoryEntry, CatalogCategoryEntry> persistableCatalogEntryMapper;
 

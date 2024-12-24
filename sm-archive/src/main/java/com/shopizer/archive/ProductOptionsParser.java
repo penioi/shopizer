@@ -24,7 +24,7 @@ public class ProductOptionsParser implements CatalogParser<PersistableProductOpt
             ppo.setOrder(Optional.ofNullable(value.getInteger("order")).orElse(0));
             ppo.setCode(value.get("code"));
             ppo.setReadOnly(value.getBoolean("readonly"));
-            ppo.setDescriptions(store.getLanguages().stream().filter(l -> value.isSet("description_" + l.getCode()))
+            ppo.setDescriptions(store.getLanguages().stream().filter(l -> value.hasValue("description_" + l.getCode()))
                     .map(l -> {
                         ProductOptionDescription description = new ProductOptionDescription();
                         description.setName(value.get("description_" + l.getCode()));

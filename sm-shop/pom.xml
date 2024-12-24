@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.shopizer</groupId>
 		<artifactId>shopizer</artifactId>
-		<version>3.2.5</version>
+		<version>3.2.6-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>sm-shop</artifactId>
@@ -154,6 +154,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:8000</jvmArguments>
+				</configuration>
 			</plugin>
 		</plugins>
 		<finalName>shopizer</finalName>

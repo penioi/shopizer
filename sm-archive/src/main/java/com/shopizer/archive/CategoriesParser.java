@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -34,19 +35,19 @@ public class CategoriesParser implements  CatalogParser<PersistableCategory>{
                 //core properties
                 PersistableCategory category = new PersistableCategory();
                 category.setCode(code);
-                category.setSortOrder(Integer.parseInt(sheetRecord.get("position")));
-                category.setVisible(Integer.parseInt(sheetRecord.get("visible")) == 1);
+                category.setSortOrder(Optional.ofNullable(sheetRecord.getInteger("position")).orElse(0));
+                category.setVisible(sheetRecord.getInteger("visible") == 1);
 
                 List<CategoryDescription> descriptions = new ArrayList<CategoryDescription>();
                 for (String language : languages) {
-                    if (!sheetRecord.isSet("name_" + language)) {
+                    if (!sheetRecord.hasValue("name_" + language)) {
                         continue;
                     }
                     CategoryDescription description = new CategoryDescription();
                     description.setLanguage(language);
                     description.setTitle(sheetRecord.get("name_" + language));
                     description.setName(sheetRecord.get("name_" + language));
-                    if (sheetRecord.isSet("description_" + language)) {
+                    if (sheetRecord.hasValue("description_" + language)) {
                         description.setDescription(sheetRecord.get("description_" + language));
                     }
 

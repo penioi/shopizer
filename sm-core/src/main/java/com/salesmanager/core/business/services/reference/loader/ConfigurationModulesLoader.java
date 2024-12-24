@@ -57,7 +57,7 @@ public class ConfigurationModulesLoader {
 		
 		try {
 			
-
+		
             Map[] objects = mapper.readValue(value, Map[].class);
 
 			for (Map object : objects) {
@@ -84,7 +84,7 @@ public class ConfigurationModulesLoader {
 					configuration.setIntegrationKeys(confs);
 				}
 
-				if (object.get("integrationKeys") != null) {
+				if (object.get("integrationOptions") != null) {
 					Map<String, List<String>> options = (Map<String, List<String>>) object.get("integrationOptions");
 					configuration.setIntegrationOptions(options);
 				}

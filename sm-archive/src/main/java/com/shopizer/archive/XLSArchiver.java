@@ -3,7 +3,6 @@ package com.shopizer.archive;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.shop.model.entity.Entity;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -12,9 +11,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 @Slf4j
@@ -47,7 +46,7 @@ public class XLSArchiver {
 
     public Map<String, List<? extends Entity>> parseXls(MerchantStore store, InputStream in) throws IOException {
         Map<String, Map<Integer, SheetRecord>> xlsData = anImport.readXls(in);
-        Map<String, List<? extends Entity>> result = new HashMap<>();
+        Map<String, List<? extends Entity>> result = new TreeMap<>();
         xlsData.entrySet().stream().filter(e -> findParser(e.getKey()) != null).forEach(e -> {
             List<? extends Entity> catalogObjects = findParser(e.getKey()).parse(store, e.getValue());
             result.put(e.getKey(), catalogObjects);

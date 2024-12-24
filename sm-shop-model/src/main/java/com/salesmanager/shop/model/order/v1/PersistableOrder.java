@@ -56,7 +56,4 @@ public class PersistableOrder extends Order {
 	public void setShippingQuote(Long shippingQuote) {
 		this.shippingQuote = shippingQuote;
 	}
-	
-
-
 }

@@ -1204,7 +1204,6 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		try {
 
-
 			Order modelOrder = new Order();
 			persistableOrderApiPopulator.populate(order, modelOrder, store, language);
 
@@ -1276,11 +1275,11 @@ public class OrderFacadeImpl implements OrderFacade {
 				throw new ConversionException("Requires Payment.amount");
 			}
 
-			String submitedAmount = order.getPayment().getAmount();
+			String submittedAmount = order.getPayment().getAmount();
 
-			BigDecimal formattedSubmittedAmount = productPriceUtils.getAmount(submitedAmount);
+			BigDecimal formattedSubmittedAmount = productPriceUtils.getAmount(submittedAmount);
 
-			BigDecimal submitedAmountFormat = productPriceUtils.getAmount(submitedAmount);
+			BigDecimal submitedAmountFormat = productPriceUtils.getAmount(submittedAmount);
 
 			BigDecimal calculatedAmount = orderTotalSummary.getTotal();
 			String strCalculatedTotal = calculatedAmount.toPlainString();
@@ -1290,7 +1289,7 @@ public class OrderFacadeImpl implements OrderFacade {
 
 
 				throw new ConversionException("Payment.amount does not match what the system has calculated "
-						+ strCalculatedTotal + " (received " + submitedAmount + ") please recalculate the order and submit again");
+						+ strCalculatedTotal + " (received " + submittedAmount + ") please recalculate the order and submit again");
 			}
 
 			modelOrder.setTotal(calculatedAmount);

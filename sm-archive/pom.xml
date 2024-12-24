@@ -6,22 +6,19 @@
     <parent>
         <groupId>com.shopizer</groupId>
         <artifactId>shopizer</artifactId>
-        <version>3.2.5</version>
+        <version>3.2.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>sm-archive</artifactId>
     <packaging>jar</packaging>
-
-    <properties>
-<!--        <maven.compiler.source>17</maven.compiler.source>-->
-<!--        <maven.compiler.target>17</maven.compiler.target>-->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.shopizer</groupId>
             <artifactId>sm-core-model</artifactId>
+        </dependency> 
+        <dependency>
+            <groupId>com.shopizer</groupId>
+            <artifactId>sm-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.shopizer</groupId>

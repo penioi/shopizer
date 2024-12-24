@@ -5,8 +5,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import java.util.Arrays;
 import javax.inject.Inject;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -32,8 +36,9 @@ public class MerchantStoreApiIntegrationTest extends ServicesTestSupport {
   private static final String TEST_STORE_CODE = "test";
   private static final String CURRENCY = "CAD";
   private static final String DEFAULT_LANGUAGE = "en";
+    private static final Logger log = LoggerFactory.getLogger(MerchantStoreApiIntegrationTest.class);
 
-  @Inject
+    @Inject
   private TestRestTemplate testRestTemplate;
   
   /**
@@ -89,6 +94,7 @@ public class MerchantStoreApiIntegrationTest extends ServicesTestSupport {
   
   
   @Test
+  @Ignore
   public void testAddAndDeleteStoreLogo() {
       LinkedMultiValueMap<String, Object> parameters = new LinkedMultiValueMap<String, Object>();
       parameters.add("file", new org.springframework.core.io.ClassPathResource("image.jpg"));

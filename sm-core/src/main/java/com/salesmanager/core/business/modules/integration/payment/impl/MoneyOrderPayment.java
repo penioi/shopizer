@@ -51,8 +51,12 @@ public class MoneyOrderPayment implements PaymentModule {
 			BigDecimal amount, Payment payment,
 			IntegrationConfiguration configuration, IntegrationModule module)
 			throws IntegrationException {
-		//NOT REQUIRED
-		return null;
+		Transaction transaction = new Transaction();
+		transaction.setAmount(amount);
+		transaction.setTransactionDate(new Date());
+		transaction.setTransactionType(TransactionType.INIT);
+		transaction.setPaymentType(PaymentType.MONEYORDER);
+		return transaction;
 	}
 
 	@Override
@@ -63,15 +67,6 @@ public class MoneyOrderPayment implements PaymentModule {
 		//NOT REQUIRED
 		return null;
 	}
-
-/*	@Override
-	public Transaction capture(MerchantStore store, Customer customer,
-			List<ShoppingCartItem> items, BigDecimal amount, Payment payment, Transaction transaction,
-			IntegrationConfiguration configuration, IntegrationModule module)
-			throws IntegrationException {
-		//NOT REQUIRED
-		return null;
-	}*/
 
 	@Override
 	public Transaction authorizeAndCapture(MerchantStore store, Customer customer,
@@ -85,12 +80,7 @@ public class MoneyOrderPayment implements PaymentModule {
 		transaction.setTransactionDate(new Date());
 		transaction.setTransactionType(TransactionType.AUTHORIZECAPTURE);
 		transaction.setPaymentType(PaymentType.MONEYORDER);
-
-		
 		return transaction;
-		
-		
-		
 	}
 
 	@Override

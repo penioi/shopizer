@@ -27,7 +27,7 @@ public class RepositoryHelper {
 			}
 		} else {
 			//int firstResult = ((criteria.getStartPage()==0?criteria.getStartPage()+1:criteria.getStartPage()) - 1) * criteria.getPageSize();
-			int firstResult = ((criteria.getStartPage()==0?0:criteria.getStartPage())) * criteria.getPageSize();
+			int firstResult = (criteria.getStartPage() - 1) * criteria.getPageSize();
 			q.setFirstResult(firstResult);
 			q.setMaxResults(criteria.getPageSize());
 			int lastPageNumber = (count.intValue() / criteria.getPageSize()) + 1;

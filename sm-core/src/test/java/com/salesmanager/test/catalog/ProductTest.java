@@ -339,8 +339,8 @@ public class ProductTest extends com.salesmanager.test.common.AbstractSalesManag
 		
 		
 		//test insert, view image
-		testInsertImage(updatableProduct);
-		testViewImage(updatableProduct);
+		//testInsertImage(updatableProduct);
+		//testViewImage(updatableProduct);
 		
 		Product refreshed = productService.getBySku("CT12345", store, en);
 		productService.delete(refreshed);

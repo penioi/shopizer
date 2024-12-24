@@ -192,10 +192,9 @@ public class PaymentServiceImpl implements PaymentService {
 				
 				if(!StringUtils.isBlank(merchantConfiguration.getValue())) {
 					
-					String decrypted = encryption.decrypt(merchantConfiguration.getValue());
-					modules = ConfigurationModulesLoader.loadIntegrationConfigurations(decrypted);
-					
-					
+					// String decrypted = encryption.decrypt(merchantConfiguration.getValue());
+					// modules = ConfigurationModulesLoader.loadIntegrationConfigurations(decrypted);
+					modules = ConfigurationModulesLoader.loadIntegrationConfigurations(merchantConfiguration.getValue());
 				}
 			}
 			return modules;
@@ -253,8 +252,6 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	@Override
 	public void removePaymentModuleConfiguration(String moduleCode, MerchantStore store) throws ServiceException {
-		
-		
 
 		try {
 			Map<String,IntegrationConfiguration> modules = new HashMap<String,IntegrationConfiguration>();
@@ -389,11 +386,7 @@ public class PaymentServiceImpl implements PaymentService {
 				order.setStatus(OrderStatus.PROCESSED);
 			}
 		}
-
 		return transaction;
-
-		
-
 	}
 	
 	@Override

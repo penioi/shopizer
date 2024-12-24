@@ -85,7 +85,9 @@
 	<beans:bean id="stripe3"
 		class="com.salesmanager.core.business.modules.integration.payment.impl.Stripe3Payment" />
 	<beans:bean id="braintree"
-		class="com.salesmanager.core.business.modules.integration.payment.impl.BraintreePayment" />
+				class="com.salesmanager.core.business.modules.integration.payment.impl.BraintreePayment" />
+	<beans:bean id="invoice"
+				class="com.salesmanager.core.business.modules.integration.payment.impl.InvoicePayment" />
 
 
 

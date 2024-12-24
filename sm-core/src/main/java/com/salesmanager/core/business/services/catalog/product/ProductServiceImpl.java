@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +57,7 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 
 	ProductRepository productRepository;
 
+	@Lazy
 	@Inject
 	CategoryService categoryService;
 
@@ -83,6 +85,7 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	@Inject
 	CoreConfiguration configuration;
 
+	@Lazy
 	@Inject
 	ProductReviewService productReviewService;
 
@@ -393,7 +396,8 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		try {
 			List<Object> products = productRepository.findBySku(productCode, merchant.getId());
 			if(products.isEmpty()) {
-				throw new ServiceException("Cannot get product with sku [" + productCode + "]");
+				return null;
+			//	throw new ServiceException("Cannot get product with sku [" + productCode + "]");
 			}
 			BigInteger id = (BigInteger) products.get(0);
 			return this.findOne(id.longValue(), merchant);

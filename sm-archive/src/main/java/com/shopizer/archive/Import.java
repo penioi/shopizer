@@ -1,19 +1,26 @@
 package com.shopizer.archive;
 
-import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.stereotype.Service;
+
+import com.shopizer.archive.SheetRecord.RecordCell;
+
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -33,17 +40,15 @@ public class Import {
         Map<Integer, SheetRecord> data = new HashMap<>();
         List<String> titleRow = new ArrayList<>();
         try (Stream<Row> rows = sheet.openStream()) {
-            rows.forEach(r -> {
+            rows.filter(r -> r.getPhysicalCellCount() > 0).forEach(r -> {
                 if(r.getRowNum() == 1) {
                     // build title row
-                    for (Cell cell : r) {
-                        titleRow.add(cell.getRawValue());
-                    }
-                } else{
+                    r.stream().filter(Objects::nonNull).forEach(cell -> titleRow.add(cell.getRawValue()));
+                } else {
                     data.put(r.getRowNum(), new SheetRecord());
-                    for (Cell cell : r) {
+                     r.stream().filter(Objects::nonNull).filter(cell -> cell.getRawValue() != null).filter(cell -> cell.getColumnIndex() < titleRow.size()).forEach( cell -> {
                         data.get(r.getRowNum()).addCell(cell.getColumnIndex(), titleRow.get(cell.getColumnIndex()), cell.getRawValue());
-                    }
+                    });
                 }
             });
         }
@@ -64,6 +69,29 @@ public class Import {
         }
         return  xlsData;
     }
+
+    /**
+     * Combine values from two or more consecotive rows if the specified column has no value.
+     * Usefull when one column  has more than one value spread on multiple rows
+     * @param columnName
+     * @param data
+     * @return
+     */
+    public List<SheetRecord> parseExpandedValuesUsing(String columnName,  Map<Integer, SheetRecord> data) {
+        List<SheetRecord> res = new ArrayList<>();
+        data.entrySet().stream().forEach(entry -> {
+            if(entry.getValue().hasValue(columnName)) {
+                res.add(new SheetRecord());
+            }
+            SheetRecord dest = res.get(res.size() - 1);
+            SheetRecord toCopy = entry.getValue();
+            toCopy.stream().forEach( recordCell -> {
+               dest.addCell(recordCell.getIndex(), recordCell.getName(), recordCell.pop());
+            }); 
+        });
+        return res;
+    }
+
 
     public String minimalFriendlyUrlCreator(String productName) {
         productName = productName.toLowerCase();

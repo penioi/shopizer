@@ -13,6 +13,7 @@ import javax.validation.Valid;
 
 import com.salesmanager.core.business.services.order.OrderService;
 import com.salesmanager.core.model.order.orderstatus.OrderStatus;
+import com.salesmanager.shop.model.order.PersistableOrderProduct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.Validate;
@@ -369,11 +370,15 @@ public class OrderApi {
 				throw new ResourceNotFoundException("Cart code " + code + " does not exist");
 			}
 
+			if(cart.getOrderId() != null)  {
+				throw new ServiceRuntimeException("409", "Cart code " + code + " is already associated with an order");
+			}
+
 			order.setShoppingCartId(cart.getId());
 			order.setCustomerId(customer.getId());//That is an existing customer purchasing
 
 			Order modelOrder = orderFacade.processOrder(order, customer, merchantStore, language, locale);
-				Long orderId = modelOrder.getId();
+			Long orderId = modelOrder.getId();
 			modelOrder.setId(orderId);
 
 
@@ -419,6 +424,10 @@ public class OrderApi {
 
 			if (cart == null) {
 				throw new ResourceNotFoundException("Cart code " + code + " does not exist");
+			}
+
+			if(cart.getOrderId() != null)  {
+				throw new ServiceRuntimeException("409", "Cart code " + code + " is already associated with an order");
 			}
 
 			//security password validation
@@ -513,8 +522,30 @@ public class OrderApi {
 		}
 
 		OrderStatus statusEnum = OrderStatus.valueOf(status);
-
 		orderFacade.updateOrderStatus(order, statusEnum, merchantStore);
 		return;
+	}
+
+
+	/// ADMIN METHODS -- ////
+
+// create annotation so it is api method
+
+	@RequestMapping(value = { "/private/orders/{orderId}/products" }, method = RequestMethod.PUT)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "store", dataType = "string", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "string", defaultValue = "en") })
+	public ReadableOrder updateOrderProducts(@PathVariable final Long orderId, @Valid @RequestBody List<PersistableOrderProduct> products, MerchantStore store) {
+		String user = authorizationUtils.authenticatedUser();
+		authorizationUtils.authorizeUser(user, Stream.of(Constants.GROUP_SUPERADMIN, Constants.GROUP_ADMIN,
+				Constants.GROUP_ADMIN_ORDER, Constants.GROUP_ADMIN_RETAIL).collect(Collectors.toList()), store);
+		Order order = orderService.getById(orderId);
+		if (order == null) {
+			throw new GenericRuntimeException("412", "Order not found [" + orderId + "]");
+		}
+		orderFacade.updateOrderProducts(order, products, store);
+		return orderFacade.getReadableOrder(orderId, store, null);
 	}
 }

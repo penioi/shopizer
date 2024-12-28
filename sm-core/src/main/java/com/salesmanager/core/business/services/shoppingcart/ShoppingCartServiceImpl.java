@@ -311,7 +311,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		List<ProductAttribute> attributesList = new ArrayList<ProductAttribute>();// attributes maintained
 		List<ShoppingCartAttributeItem> removeAttributesList = new ArrayList<ShoppingCartAttributeItem>();// attributes
 																											// to remove
-		// DELETE ORPHEANS MANUALLY
+		// DELETE ORPHANS MANUALLY
 		if ((productAttributes != null && productAttributes.size() > 0)
 				|| (cartAttributes != null && cartAttributes.size() > 0)) {
 			if (cartAttributes != null) {
@@ -348,10 +348,13 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 			item.setAttributes(null);
 		}
 
-		// set item price
-		FinalPrice price = pricingService.calculateProductPrice(product, attributesList);
-		item.setItemPrice(price.getFinalPrice());
-		item.setFinalPrice(price);
+		if(item.getItemPrice() != null && item.isAdminAdjusted()) {
+		} else {
+			// set item price
+			FinalPrice price = pricingService.calculateProductPrice(product, attributesList);
+			item.setItemPrice(price.getFinalPrice());
+			item.setFinalPrice(price);
+		}
 
 		BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
 		item.setSubTotal(subTotal);

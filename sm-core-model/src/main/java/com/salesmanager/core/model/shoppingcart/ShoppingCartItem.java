@@ -95,7 +95,9 @@ public class ShoppingCartItem extends SalesManagerEntity<Long, ShoppingCartItem>
 	private boolean obsolete = false;
 
 
-
+	@JsonIgnore
+	@Transient
+	private boolean adminAdjusted = false;
 
 	public ShoppingCartItem(ShoppingCart shoppingCart, Product product) {
 		this(product);
@@ -248,4 +250,11 @@ public class ShoppingCartItem extends SalesManagerEntity<Long, ShoppingCartItem>
 		this.variant = variant;
 	}
 
+	public void setAdminAdjusted(boolean adminAdjusted) {
+		this.adminAdjusted = adminAdjusted;
+	}
+
+	public boolean isAdminAdjusted() {
+		return adminAdjusted;
+	}
 }

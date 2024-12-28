@@ -55,7 +55,7 @@ public class Zone extends SalesManagerEntity<Long, Zone> {
   public Zone(Country country, String name, String code) {
     this.setCode(code);
     this.setCountry(country);
-    this.setCode(name);
+    this.setName(name);
   }
 
   public Country getCountry() {

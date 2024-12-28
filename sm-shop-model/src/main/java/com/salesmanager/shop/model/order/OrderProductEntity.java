@@ -28,8 +28,4 @@ public class OrderProductEntity extends OrderProduct implements Serializable {
 	public void setProduct(ReadableProduct product) {
 		this.product = product;
 	}
-
-
-
-
 }

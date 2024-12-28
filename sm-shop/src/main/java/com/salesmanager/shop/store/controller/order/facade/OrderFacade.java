@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.salesmanager.core.model.order.orderstatus.OrderStatus;
+import com.salesmanager.shop.model.order.PersistableOrderProduct;
 import org.springframework.validation.BindingResult;
 
 import com.salesmanager.core.business.exception.ServiceException;
@@ -31,28 +32,46 @@ import com.salesmanager.shop.model.order.transaction.ReadableTransaction;
 public interface OrderFacade {
 
 	ShopOrder initializeOrder(MerchantStore store, Customer customer, ShoppingCart shoppingCart, Language language) throws Exception;
+
 	void refreshOrder(ShopOrder order, MerchantStore store, Customer customer, ShoppingCart shoppingCart, Language language) throws Exception;
-	/** used in website **/
+
+	/**
+	 * used in website
+	 **/
 	OrderTotalSummary calculateOrderTotal(MerchantStore store, ShopOrder order, Language language) throws Exception;
-	/** used in the API **/
+
+	/**
+	 * used in the API
+	 **/
 	OrderTotalSummary calculateOrderTotal(MerchantStore store, com.salesmanager.shop.model.order.v0.PersistableOrder order, Language language) throws Exception;
 
-	/** process a valid order **/
+	/**
+	 * process a valid order
+	 **/
 	Order processOrder(ShopOrder order, Customer customer, MerchantStore store, Language language) throws ServiceException;
-	/** process a valid order against an initial transaction **/
+
+	/**
+	 * process a valid order against an initial transaction
+	 **/
 	Order processOrder(ShopOrder order, Customer customer, Transaction transaction, MerchantStore store, Language language) throws ServiceException;
-	/** process a valid order submitted from the API **/
+
+	/**
+	 * process a valid order submitted from the API
+	 **/
 	Order processOrder(com.salesmanager.shop.model.order.v1.PersistableOrder order, Customer customer, MerchantStore store, Language language, Locale locale) throws ServiceException;
 
 
-
-	/** creates a working copy of customer when the user is anonymous **/
+	/**
+	 * creates a working copy of customer when the user is anonymous
+	 **/
 	Customer initEmptyCustomer(MerchantStore store);
+
 	List<Country> getShipToCountry(MerchantStore store, Language language)
 			throws Exception;
 
 	/**
 	 * Get a ShippingQuote based on merchant configuration and items to be shipped
+	 *
 	 * @param cart
 	 * @param order
 	 * @param store
@@ -61,16 +80,17 @@ public interface OrderFacade {
 	 * @throws Exception
 	 */
 	ShippingQuote getShippingQuote(PersistableCustomer customer, ShoppingCart cart, ShopOrder order,
-			MerchantStore store, Language language) throws Exception;
+								   MerchantStore store, Language language) throws Exception;
 
 	ShippingQuote getShippingQuote(Customer customer, ShoppingCart cart, com.salesmanager.shop.model.order.v0.PersistableOrder order,
-			MerchantStore store, Language language) throws Exception;
+								   MerchantStore store, Language language) throws Exception;
 
 	ShippingQuote getShippingQuote(Customer customer, ShoppingCart cart,
-			MerchantStore store, Language language) throws Exception;
+								   MerchantStore store, Language language) throws Exception;
 
 	/**
 	 * Creates a ShippingSummary object for OrderTotal calculation based on a ShippingQuote
+	 *
 	 * @param quote
 	 * @param store
 	 * @param language
@@ -80,6 +100,7 @@ public interface OrderFacade {
 
 	/**
 	 * Validates an order submitted from the web application
+	 *
 	 * @param order
 	 * @param bindingResult
 	 * @param messagesResult
@@ -88,11 +109,12 @@ public interface OrderFacade {
 	 * @throws ServiceException
 	 */
 	void validateOrder(ShopOrder order, BindingResult bindingResult,
-			Map<String, String> messagesResult, MerchantStore store,
-			Locale locale) throws ServiceException;
+					   Map<String, String> messagesResult, MerchantStore store,
+					   Locale locale) throws ServiceException;
 
 	/**
 	 * Creates a ReadableOrder object from an orderId
+	 *
 	 * @param orderId
 	 * @param store
 	 * @param language
@@ -103,6 +125,7 @@ public interface OrderFacade {
 
 	/**
 	 * List of orderstatus history
+	 *
 	 * @param orderId
 	 * @param store
 	 * @param language
@@ -112,18 +135,18 @@ public interface OrderFacade {
 
 
 	/**
-     * <p>Method used to fetch all orders associated with customer customer.
-     * It will used current customer ID to fetch all orders which has been
-     * placed by customer for current store.</p>
-     *
-     * @param customer currently logged in customer
-     * @param store store associated with current customer
-     * @return ReadableOrderList
-     * @throws Exception
-     */
+	 * <p>Method used to fetch all orders associated with customer customer.
+	 * It will used current customer ID to fetch all orders which has been
+	 * placed by customer for current store.</p>
+	 *
+	 * @param customer currently logged in customer
+	 * @param store    store associated with current customer
+	 * @return ReadableOrderList
+	 * @throws Exception
+	 */
 
 	com.salesmanager.shop.model.order.v0.ReadableOrderList getReadableOrderList(MerchantStore store, Customer customer, int start,
-			int maxCount, Language language) throws Exception;
+																				int maxCount, Language language) throws Exception;
 
 
 	/**
@@ -140,6 +163,7 @@ public interface OrderFacade {
 
 	/**
 	 * Get a list of Order on which payment capture must be done
+	 *
 	 * @param store
 	 * @param startDate
 	 * @param endDate
@@ -148,11 +172,12 @@ public interface OrderFacade {
 	 * @throws Exception
 	 */
 	com.salesmanager.shop.model.order.v0.ReadableOrderList getCapturableOrderList(MerchantStore store, Date startDate, Date endDate,
-			Language language) throws Exception;
+																				  Language language) throws Exception;
 
 	/**
 	 * Capture a pre-authorized transaction. Candidate order ids can be obtained from
 	 * getCapturableOrderList
+	 *
 	 * @param store
 	 * @param order
 	 * @param customer
@@ -168,6 +193,7 @@ public interface OrderFacade {
 
 	/**
 	 * Get orders for a given store
+	 *
 	 * @param store
 	 * @param start
 	 * @param maxCount
@@ -176,10 +202,11 @@ public interface OrderFacade {
 	 * @throws Exception
 	 */
 	com.salesmanager.shop.model.order.v0.ReadableOrderList getReadableOrderList(MerchantStore store, int start,
-			int maxCount, Language language) throws Exception;
+																				int maxCount, Language language) throws Exception;
 
 	/**
 	 * Adds a status to an order status history
+	 *
 	 * @param status
 	 * @param id
 	 * @param store
@@ -190,16 +217,25 @@ public interface OrderFacade {
 	 * Updates order customer
 	 * Only updates customer information from the order
 	 * It won't update customer object from Customer entity
+	 *
 	 * @param orderId
 	 * @param customer
 	 * @param store
 	 */
 	void updateOrderCustomre(Long orderId, PersistableCustomer customer, MerchantStore store);
 
-	List<ReadableTransaction> listTransactions (Long orderId, MerchantStore store);
+	List<ReadableTransaction> listTransactions(Long orderId, MerchantStore store);
 
 	/**
 	 * Update Order status and create order_status_history record
 	 */
 	void updateOrderStatus(Order order, OrderStatus newStatus, MerchantStore store);
+
+	/**
+	 * Updates the products in an order.
+	 *
+	 * @param order the order
+	 * @param orderProducts the list of order products
+	 */
+	void updateOrderProducts(Order order, List<PersistableOrderProduct> orderProducts, MerchantStore merchantStore);
 }

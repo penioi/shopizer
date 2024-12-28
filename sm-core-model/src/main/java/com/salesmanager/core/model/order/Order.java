@@ -145,7 +145,7 @@ public class Order extends SalesManagerEntity<Long, Order> {
 	//@OneToMany(mappedBy = "order")
 	//private Set<OrderAccount> orderAccounts = new HashSet<OrderAccount>();
 	
-	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<OrderProduct> orderProducts = new LinkedHashSet<OrderProduct>();
 	
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

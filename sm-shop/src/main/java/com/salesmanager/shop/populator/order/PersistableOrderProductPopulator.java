@@ -24,81 +24,81 @@ import com.salesmanager.shop.constants.ApplicationConstants;
 import com.salesmanager.shop.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.shop.model.order.PersistableOrderProduct;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class PersistableOrderProductPopulator extends
-		AbstractDataPopulator<PersistableOrderProduct, OrderProduct> {
-	
-	private ProductService productService;
-	private DigitalProductService digitalProductService;
-	private ProductAttributeService productAttributeService;
+        AbstractDataPopulator<PersistableOrderProduct, OrderProduct> {
+
+    private ProductService productService;
+    private DigitalProductService digitalProductService;
+    private ProductAttributeService productAttributeService;
 
 
-	public ProductAttributeService getProductAttributeService() {
-		return productAttributeService;
-	}
+    public ProductAttributeService getProductAttributeService() {
+        return productAttributeService;
+    }
 
-	public void setProductAttributeService(
-			ProductAttributeService productAttributeService) {
-		this.productAttributeService = productAttributeService;
-	}
+    public void setProductAttributeService(
+            ProductAttributeService productAttributeService) {
+        this.productAttributeService = productAttributeService;
+    }
 
-	public DigitalProductService getDigitalProductService() {
-		return digitalProductService;
-	}
+    public DigitalProductService getDigitalProductService() {
+        return digitalProductService;
+    }
 
-	public void setDigitalProductService(DigitalProductService digitalProductService) {
-		this.digitalProductService = digitalProductService;
-	}
+    public void setDigitalProductService(DigitalProductService digitalProductService) {
+        this.digitalProductService = digitalProductService;
+    }
 
-	/**
-	 * Converts a ShoppingCartItem carried in the ShoppingCart to an OrderProduct
-	 * that will be saved in the system
-	 */
-	@Override
-	public OrderProduct populate(PersistableOrderProduct source, OrderProduct target,
-			MerchantStore store, Language language) throws ConversionException {
-		
-		Validate.notNull(productService,"productService must be set");
-		Validate.notNull(digitalProductService,"digitalProductService must be set");
-		Validate.notNull(productAttributeService,"productAttributeService must be set");
+    /**
+     * Converts a ShoppingCartItem carried in the ShoppingCart to an OrderProduct
+     * that will be saved in the system
+     */
+    @Override
+    public OrderProduct populate(PersistableOrderProduct source, OrderProduct target,
+                                 MerchantStore store, Language language) throws ConversionException {
 
-		
-		try {
-			Product modelProduct = productService.getById(source.getProduct().getId());
-			if(modelProduct==null) {
-				throw new ConversionException("Cannot get product with id (productId) " + source.getProduct().getId());
-			}
-			
-			if(modelProduct.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
-				throw new ConversionException("Invalid product id " + source.getProduct().getId());
-			}
+        Validate.notNull(productService, "productService must be set");
+        Validate.notNull(digitalProductService, "digitalProductService must be set");
+        Validate.notNull(productAttributeService, "productAttributeService must be set");
 
-			DigitalProduct digitalProduct = digitalProductService.getByProduct(store, modelProduct);
-			
-			if(digitalProduct!=null) {
-				OrderProductDownload orderProductDownload = new OrderProductDownload();	
-				orderProductDownload.setOrderProductFilename(digitalProduct.getProductFileName());
-				orderProductDownload.setOrderProduct(target);
-				orderProductDownload.setDownloadCount(0);
-				orderProductDownload.setMaxdays(ApplicationConstants.MAX_DOWNLOAD_DAYS);
-				target.getDownloads().add(orderProductDownload);
-			}
 
-			target.setOneTimeCharge(source.getPrice());	
-			target.setProductName(source.getProduct().getDescription().getName());
-			target.setProductQuantity(source.getOrderedQuantity());
-			target.setSku(source.getProduct().getSku());
-			
-			OrderProductPrice orderProductPrice = new OrderProductPrice();
-			orderProductPrice.setDefaultPrice(true);
-			orderProductPrice.setProductPrice(source.getPrice());
-			orderProductPrice.setOrderProduct(target);
-			
+        try {
+            Product modelProduct = productService.getById(source.getProduct().getId());
+            if (modelProduct == null) {
+                throw new ConversionException("Cannot get product with id (productId) " + source.getProduct().getId());
+            }
 
-			
-			Set<OrderProductPrice> prices = new HashSet<OrderProductPrice>();
-			prices.add(orderProductPrice);
+            if (modelProduct.getMerchantStore().getId().intValue() != store.getId().intValue()) {
+                throw new ConversionException("Invalid product id " + source.getProduct().getId());
+            }
 
-			/** DO NOT SUPPORT MUTIPLE PRICES **/
+            DigitalProduct digitalProduct = digitalProductService.getByProduct(store, modelProduct);
+
+            if (digitalProduct != null) {
+                OrderProductDownload orderProductDownload = new OrderProductDownload();
+                orderProductDownload.setOrderProductFilename(digitalProduct.getProductFileName());
+                orderProductDownload.setOrderProduct(target);
+                orderProductDownload.setDownloadCount(0);
+                orderProductDownload.setMaxdays(ApplicationConstants.MAX_DOWNLOAD_DAYS);
+                target.getDownloads().add(orderProductDownload);
+            }
+
+            target.setOneTimeCharge(source.getPrice());
+            if(!isBlank(source.getProduct().getDescription().getName())) {
+                target.setProductName(source.getProduct().getDescription().getName());
+            }
+
+            target.setProductQuantity(source.getOrderedQuantity());
+            target.setSku(source.getProduct().getSku());
+
+            OrderProductPrice orderProductPrice = target.getPrices().stream().findFirst().orElse(new OrderProductPrice());
+            orderProductPrice.setDefaultPrice(true);
+            orderProductPrice.setProductPrice(source.getPrice());
+            orderProductPrice.setOrderProduct(target);
+            target.getPrices().add(orderProductPrice);
+            /** DO NOT SUPPORT MUTIPLE PRICES **/
 /*			//Other prices
 			List<FinalPrice> otherPrices = finalPrice.getAdditionalPrices();
 			if(otherPrices!=null) {
@@ -108,60 +108,58 @@ public class PersistableOrderProductPopulator extends
 					prices.add(other);
 				}
 			}*/
-			
-			target.setPrices(prices);
-			
-			//OrderProductAttribute
-			List<ProductAttribute> attributeItems = source.getAttributes();
-			if(!CollectionUtils.isEmpty(attributeItems)) {
-				Set<OrderProductAttribute> attributes = new HashSet<OrderProductAttribute>();
-				for(ProductAttribute attribute : attributeItems) {
-					OrderProductAttribute orderProductAttribute = new OrderProductAttribute();
-					orderProductAttribute.setOrderProduct(target);
-					Long id = attribute.getId();
-					com.salesmanager.core.model.catalog.product.attribute.ProductAttribute attr = productAttributeService.getById(id);
-					if(attr==null) {
-						throw new ConversionException("Attribute id " + id + " does not exists");
-					}
-					
-					if(attr.getProduct().getMerchantStore().getId().intValue()!=store.getId().intValue()) {
-						throw new ConversionException("Attribute id " + id + " invalid for this store");
-					}
-					
-					orderProductAttribute.setProductAttributeIsFree(attr.getProductAttributeIsFree());
-					orderProductAttribute.setProductAttributeName(attr.getProductOption().getDescriptionsSettoList().get(0).getName());
-					orderProductAttribute.setProductAttributeValueName(attr.getProductOptionValue().getDescriptionsSettoList().get(0).getName());
-					orderProductAttribute.setProductAttributePrice(attr.getProductAttributePrice());
-					orderProductAttribute.setProductAttributeWeight(attr.getProductAttributeWeight());
-					orderProductAttribute.setProductOptionId(attr.getProductOption().getId());
-					orderProductAttribute.setProductOptionValueId(attr.getProductOptionValue().getId());
-					attributes.add(orderProductAttribute);
-				}
-				target.setOrderAttributes(attributes);
-			}
 
-			
-		} catch (Exception e) {
-			throw new ConversionException(e);
-		}
-		
-		
-		return target;
-	}
 
-	@Override
-	protected OrderProduct createTarget() {
-		return null;
-	}
+            //OrderProductAttribute
+            List<ProductAttribute> attributeItems = source.getAttributes();
+            if (!CollectionUtils.isEmpty(attributeItems)) {
+                Set<OrderProductAttribute> attributes = new HashSet<OrderProductAttribute>();
+                for (ProductAttribute attribute : attributeItems) {
+                    OrderProductAttribute orderProductAttribute = new OrderProductAttribute();
+                    orderProductAttribute.setOrderProduct(target);
+                    Long id = attribute.getId();
+                    com.salesmanager.core.model.catalog.product.attribute.ProductAttribute attr = productAttributeService.getById(id);
+                    if (attr == null) {
+                        throw new ConversionException("Attribute id " + id + " does not exists");
+                    }
 
-	public void setProductService(ProductService productService) {
-		this.productService = productService;
-	}
+                    if (attr.getProduct().getMerchantStore().getId().intValue() != store.getId().intValue()) {
+                        throw new ConversionException("Attribute id " + id + " invalid for this store");
+                    }
 
-	public ProductService getProductService() {
-		return productService;
-	}
-	
+                    orderProductAttribute.setProductAttributeIsFree(attr.getProductAttributeIsFree());
+                    orderProductAttribute.setProductAttributeName(attr.getProductOption().getDescriptionsSettoList().get(0).getName());
+                    orderProductAttribute.setProductAttributeValueName(attr.getProductOptionValue().getDescriptionsSettoList().get(0).getName());
+                    orderProductAttribute.setProductAttributePrice(attr.getProductAttributePrice());
+                    orderProductAttribute.setProductAttributeWeight(attr.getProductAttributeWeight());
+                    orderProductAttribute.setProductOptionId(attr.getProductOption().getId());
+                    orderProductAttribute.setProductOptionValueId(attr.getProductOptionValue().getId());
+                    attributes.add(orderProductAttribute);
+                }
+                target.setOrderAttributes(attributes);
+            }
+
+
+        } catch (Exception e) {
+            throw new ConversionException(e);
+        }
+
+
+        return target;
+    }
+
+    @Override
+    protected OrderProduct createTarget() {
+        return null;
+    }
+
+    public void setProductService(ProductService productService) {
+        this.productService = productService;
+    }
+
+    public ProductService getProductService() {
+        return productService;
+    }
 
 
 }

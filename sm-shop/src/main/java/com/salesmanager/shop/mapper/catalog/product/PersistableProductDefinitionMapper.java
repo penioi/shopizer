@@ -173,6 +173,8 @@ public class PersistableProductDefinitionMapper implements Mapper<PersistablePro
 			              productAvailability.setProductQuantity(source.getQuantity());
 			              productAvailability.setProductStatus(source.isCanBePurchased());
 			              p.setProductPriceAmount(source.getPrice());
+						  productAvailability.setProductQuantityOrderMin(source.getQuantityOrderMinimum());
+						  productAvailability.setProductQuantityOrderMax(source.getQuantityOrderMaximum());
 			              break;
 			            }
 			          }

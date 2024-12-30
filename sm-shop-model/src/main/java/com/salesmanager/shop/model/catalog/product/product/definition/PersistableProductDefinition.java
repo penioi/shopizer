@@ -22,6 +22,8 @@ public class PersistableProductDefinition extends ProductDefinition {
 	private String manufacturer;
 	private BigDecimal price;
 	private int quantity;
+	private int quantityOrderMinimum;
+	private int quantityOrderMaximum;
 	public List<ProductDescription> getDescriptions() {
 		return descriptions;
 	}
@@ -65,4 +67,16 @@ public class PersistableProductDefinition extends ProductDefinition {
 		this.quantity = quantity;
 	}
 
+	public int getQuantityOrderMinimum() {
+		return quantityOrderMinimum;
+	}
+	public void setQuantityOrderMinimum(int quantityOrderMinimum) {
+		this.quantityOrderMinimum = quantityOrderMinimum;
+	}
+	public int getQuantityOrderMaximum() {
+		return quantityOrderMaximum;
+	}
+	public void setQuantityOrderMaximum(int quantityOrderMaximum) {
+		this.quantityOrderMaximum = quantityOrderMaximum;
+	}
 }

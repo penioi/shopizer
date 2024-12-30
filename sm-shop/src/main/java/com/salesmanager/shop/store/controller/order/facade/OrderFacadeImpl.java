@@ -1,40 +1,5 @@
 package com.salesmanager.shop.store.controller.order.facade;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import com.salesmanager.core.model.reference.zone.Zone;
-import com.salesmanager.shop.populator.order.*;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-
 import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
@@ -59,24 +24,16 @@ import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.order.Order;
-import com.salesmanager.core.model.order.OrderCriteria;
-import com.salesmanager.core.model.order.OrderList;
-import com.salesmanager.core.model.order.OrderSummary;
-import com.salesmanager.core.model.order.OrderTotalSummary;
+import com.salesmanager.core.model.order.*;
 import com.salesmanager.core.model.order.attributes.OrderAttribute;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderstatus.OrderStatus;
 import com.salesmanager.core.model.order.orderstatus.OrderStatusHistory;
 import com.salesmanager.core.model.order.payment.CreditCard;
-import com.salesmanager.core.model.payments.CreditCardPayment;
-import com.salesmanager.core.model.payments.CreditCardType;
-import com.salesmanager.core.model.payments.Payment;
-import com.salesmanager.core.model.payments.PaymentType;
-import com.salesmanager.core.model.payments.Transaction;
-import com.salesmanager.core.model.payments.TransactionType;
+import com.salesmanager.core.model.payments.*;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.core.model.reference.zone.Zone;
 import com.salesmanager.core.model.shipping.ShippingProduct;
 import com.salesmanager.core.model.shipping.ShippingQuote;
 import com.salesmanager.core.model.shipping.ShippingSummary;
@@ -95,17 +52,35 @@ import com.salesmanager.shop.model.order.total.OrderTotal;
 import com.salesmanager.shop.model.order.transaction.ReadableTransaction;
 import com.salesmanager.shop.populator.customer.CustomerPopulator;
 import com.salesmanager.shop.populator.customer.PersistableCustomerPopulator;
+import com.salesmanager.shop.populator.order.*;
 import com.salesmanager.shop.populator.order.transaction.PersistablePaymentPopulator;
 import com.salesmanager.shop.populator.order.transaction.ReadableTransactionPopulator;
 import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFacade;
-import com.salesmanager.shop.utils.DateUtil;
-import com.salesmanager.shop.utils.EmailTemplatesUtils;
-import com.salesmanager.shop.utils.ImageFilePath;
-import com.salesmanager.shop.utils.LabelUtils;
-import com.salesmanager.shop.utils.LocaleUtils;
+import com.salesmanager.shop.utils.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("orderFacade")
 public class OrderFacadeImpl implements OrderFacade {
@@ -403,7 +378,9 @@ public class OrderFacadeImpl implements OrderFacade {
                 for (ProductAvailability availability : product.getAvailabilities()) {
                     if (availability.getRegion().equals(Constants.ALL_REGIONS)) {
                         int qty = availability.getProductQuantity();
-                        if (qty < item.getQuantity()) {
+                        if (qty < item.getQuantity()
+                                || ( availability.getProductQuantityOrderMin() > 0 && item.getQuantity() < availability.getProductQuantityOrderMin())
+                                || ( availability.getProductQuantityOrderMax() > 0 && item.getQuantity() > availability.getProductQuantityOrderMax())) {
                             throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
                         }
                     }
@@ -950,7 +927,7 @@ public class OrderFacadeImpl implements OrderFacade {
             List<com.salesmanager.shop.model.order.v0.ReadableOrder> readableOrders = new ArrayList<com.salesmanager.shop.model.order.v0.ReadableOrder>();
             for (Order order : orders) {
                 com.salesmanager.shop.model.order.v0.ReadableOrder readableOrder = new com.salesmanager.shop.model.order.v0.ReadableOrder();
-                readableOrderPopulator.populate(order, readableOrder, null, null);
+                readableOrderPopulator.populate(order, readableOrder, store, store.getDefaultLanguage());
                 readableOrders.add(readableOrder);
 
             }
@@ -1140,7 +1117,7 @@ public class OrderFacadeImpl implements OrderFacade {
 
             readableOrder.setProducts(orderProducts);
         } catch (Exception e) {
-            throw new ServiceRuntimeException("Error while getting order [" + orderId + "]");
+            throw   new ServiceRuntimeException("Error while getting order [" + orderId + "]");
         }
 
         return readableOrder;

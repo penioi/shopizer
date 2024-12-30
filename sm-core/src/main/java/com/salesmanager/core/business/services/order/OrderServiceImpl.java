@@ -1,31 +1,5 @@
 package com.salesmanager.core.business.services.order;
 
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-
 import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.order.InvoiceModule;
@@ -45,16 +19,7 @@ import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.common.UserContext;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.order.Order;
-import com.salesmanager.core.model.order.OrderCriteria;
-import com.salesmanager.core.model.order.OrderList;
-import com.salesmanager.core.model.order.OrderSummary;
-import com.salesmanager.core.model.order.OrderSummaryType;
-import com.salesmanager.core.model.order.OrderTotal;
-import com.salesmanager.core.model.order.OrderTotalSummary;
-import com.salesmanager.core.model.order.OrderTotalType;
-import com.salesmanager.core.model.order.OrderTotalVariation;
-import com.salesmanager.core.model.order.OrderValueType;
+import com.salesmanager.core.model.order.*;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderstatus.OrderStatus;
 import com.salesmanager.core.model.order.orderstatus.OrderStatusHistory;
@@ -66,6 +31,24 @@ import com.salesmanager.core.model.shipping.ShippingConfiguration;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.core.model.tax.TaxItem;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("orderService")
 public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order> implements OrderService {
@@ -201,9 +184,11 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
                 throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
             for (ProductAvailability availability : p.getAvailabilities()) {
                 int qty = availability.getProductQuantity();
-                if (qty < orderProduct.getProductQuantity()) {
-                    //throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
-                    LOGGER.error("APP-BACKEND [" + ServiceException.EXCEPTION_INVENTORY_MISMATCH + "]");
+                if (qty < orderProduct.getProductQuantity()
+                        || ( availability.getProductQuantityOrderMin() > 0 && orderProduct.getProductQuantity() < availability.getProductQuantityOrderMin())
+                        || ( availability.getProductQuantityOrderMax() > 0 && orderProduct.getProductQuantity() > availability.getProductQuantityOrderMax()))  {
+                     throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
+                    //LOGGER.error("APP-BACKEND [" + ServiceException.EXCEPTION_INVENTORY_MISMATCH + "]");
                 }
                 qty = qty - orderProduct.getProductQuantity();
                 availability.setProductQuantity(qty);

@@ -3,9 +3,12 @@ package com.salesmanager.shop.populator.order;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
-
+import com.salesmanager.shop.mapper.order.ReadableOrderProductMapper;
+import com.salesmanager.shop.model.order.ReadableOrderProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.salesmanager.shop.populator.store.ReadableMerchantStorePopulator;
 import com.salesmanager.shop.utils.ImageFilePath;
 
+
 @Component
 public class ReadableOrderPopulator extends
 		AbstractDataPopulator<Order, ReadableOrder> {
@@ -45,13 +49,15 @@ public class ReadableOrderPopulator extends
 	@Autowired
 	private ReadableMerchantStorePopulator readableMerchantStorePopulator;
 
+    @Autowired
+    private ReadableOrderProductMapper readableOrderProductMapper;
 
 	@Override
 	public ReadableOrder populate(Order source, ReadableOrder target,
 			MerchantStore store, Language language) throws ConversionException {
 		
 		
-		
+
 		target.setId(source.getId());
 		target.setDatePurchased(source.getDatePurchased());
 		target.setOrderStatus(source.getStatus());
@@ -190,7 +196,12 @@ public class ReadableOrderPopulator extends
 		}
 		
 		target.setTotals(totals);
-		
+
+        // products
+        List<ReadableOrderProduct> products = source.getOrderProducts()
+                .stream().map(pr -> readableOrderProductMapper.convert(pr, store, Optional.ofNullable(language).orElse(store.getDefaultLanguage()))).collect(Collectors.toList());
+        target.setProducts(products);
+
 		return target;
 	}
 	

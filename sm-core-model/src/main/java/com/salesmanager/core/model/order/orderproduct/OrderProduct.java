@@ -1,20 +1,12 @@
 package com.salesmanager.core.model.order.orderproduct;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.TableGenerator;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
@@ -56,7 +48,10 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 
 	@OneToMany(mappedBy = "orderProduct", cascade = CascadeType.ALL)
 	private Set<OrderProductDownload> downloads = new HashSet<OrderProductDownload>();
-	
+
+	@OneToMany(mappedBy = "orderProduct", cascade = CascadeType.ALL)
+	private List<OrderProductHistory> history = new ArrayList<>();
+
 	public OrderProduct() {
 	}
 
@@ -84,8 +79,6 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	public void setProductQuantity(int productQuantity) {
 		this.productQuantity = productQuantity;
 	}
-
-
 
 	public Order getOrder() {
 		return order;
@@ -136,5 +129,22 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	public BigDecimal getOneTimeCharge() {
 		return oneTimeCharge;
 	}
-	
+
+	public List<OrderProductHistory> getHistory() {
+		return history;
+	}
+
+	public void setHistory(List<OrderProductHistory> history) {
+		this.history = history;
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		OrderProductHistory productHistory = new OrderProductHistory();
+		productHistory.setOrderProduct(this);
+		productHistory.setPrice(this.getPrices().iterator().next().getProductPrice());
+		productHistory.setProductQuantity(this.getProductQuantity());
+		this.getHistory().add(productHistory);
+	}
+
 }

@@ -192,9 +192,9 @@ public class PaymentServiceImpl implements PaymentService {
 				
 				if(!StringUtils.isBlank(merchantConfiguration.getValue())) {
 					
-					// String decrypted = encryption.decrypt(merchantConfiguration.getValue());
-					// modules = ConfigurationModulesLoader.loadIntegrationConfigurations(decrypted);
-					modules = ConfigurationModulesLoader.loadIntegrationConfigurations(merchantConfiguration.getValue());
+					 String decrypted = encryption.decrypt(merchantConfiguration.getValue());
+					 modules = ConfigurationModulesLoader.loadIntegrationConfigurations(decrypted);
+//					modules = ConfigurationModulesLoader.loadIntegrationConfigurations(merchantConfiguration.getValue());
 				}
 			}
 			return modules;

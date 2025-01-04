@@ -24,7 +24,7 @@ public class ManifacturerParser implements  CatalogParser<PersistableManufacture
     private final Import anImport = new Import();
 
     public String getEntityName() {
-        return "manifacturer";
+        return "manufacturer";
     }
 
 

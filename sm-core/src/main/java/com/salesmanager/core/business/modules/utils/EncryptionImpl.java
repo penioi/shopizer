@@ -27,7 +27,7 @@ public final class EncryptionImpl implements Encryption {
 		// value = StringUtils.rightPad(value, 16,"*");
 		// Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
 		// NEED TO UNDERSTAND WHY PKCS5Padding DOES NOT WORK
-		Cipher cipher = Cipher.getInstance(CYPHER_SPEC);
+ 		Cipher cipher = Cipher.getInstance(CYPHER_SPEC);
 		SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(), KEY_SPEC);
 		IvParameterSpec ivSpec = new IvParameterSpec(IV_P
 				.getBytes());

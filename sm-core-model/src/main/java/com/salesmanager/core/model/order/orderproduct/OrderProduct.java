@@ -2,6 +2,7 @@ package com.salesmanager.core.model.order.orderproduct;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +12,10 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.order.Order;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+@EntityListeners(OrderProductEntityListener.class)
 @Entity
 @Table (name="ORDER_PRODUCT" )
 public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
@@ -35,6 +39,9 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	@Column (name="ONETIME_CHARGE" , nullable=false )
 	private BigDecimal oneTimeCharge;
 
+	@Column(name = "LAST_UPDATED")
+	private Date lastUpdated = new Date();
+
 	@JsonIgnore
 	@ManyToOne(targetEntity = Order.class)
 	@JoinColumn(name = "ORDER_ID", nullable = false)
@@ -51,6 +58,9 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 
 	@OneToMany(mappedBy = "orderProduct", cascade = CascadeType.ALL)
 	private List<OrderProductHistory> history = new ArrayList<>();
+
+	@Transient
+	private OrderProductHistory originalState;
 
 	public OrderProduct() {
 	}
@@ -138,13 +148,20 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 		this.history = history;
 	}
 
-	@PreUpdate
-	public void preUpdate() {
-		OrderProductHistory productHistory = new OrderProductHistory();
-		productHistory.setOrderProduct(this);
-		productHistory.setPrice(this.getPrices().iterator().next().getProductPrice());
-		productHistory.setProductQuantity(this.getProductQuantity());
-		this.getHistory().add(productHistory);
+
+	public Date getLastUpdated() {
+		return lastUpdated;
 	}
 
+	public void setLastUpdated(Date lastUpdated) {
+		this.lastUpdated = lastUpdated;
+	}
+
+	public OrderProductHistory getOriginalState() {
+		return originalState;
+	}
+
+	public void setOriginalState(OrderProductHistory originalState) {
+		this.originalState = originalState;
+	}
 }

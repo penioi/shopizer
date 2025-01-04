@@ -45,7 +45,7 @@ public class FilesController extends AbstractController {
 		FileContentType fileType = FileContentType.STATIC_FILE;
 		
 		// needs to query the new API
-		OutputContentFile file =contentService.getContentFile(storeCode, fileType, new StringBuilder().append(fileName).append(".").append(extension).toString());
+		OutputContentFile file = contentService.getContentFile(storeCode, fileType, new StringBuilder().append(fileName).append(".").append(extension).toString());
 		
 		
 		if(file!=null) {

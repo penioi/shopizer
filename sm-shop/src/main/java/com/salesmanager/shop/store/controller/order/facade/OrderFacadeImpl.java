@@ -3,6 +3,7 @@ package com.salesmanager.shop.store.controller.order.facade;
 import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.repositories.order.orderproduct.OrderProductRepository;
 import com.salesmanager.core.business.services.catalog.pricing.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
@@ -69,6 +70,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -141,6 +143,9 @@ public class OrderFacadeImpl implements OrderFacade {
     @Inject
     @Qualifier("img")
     private ImageFilePath imageUtils;
+
+    @Inject
+    private OrderProductRepository orderProductRepository;
 
     @Override
     public ShopOrder initializeOrder(MerchantStore store, Customer customer, ShoppingCart shoppingCart,
@@ -1333,7 +1338,7 @@ public class OrderFacadeImpl implements OrderFacade {
     }
 
     @Async
-    private void notify(Order order, Customer customer, MerchantStore store, Language language, Locale locale) throws Exception {
+    void notify(Order order, Customer customer, MerchantStore store, Language language, Locale locale) throws Exception {
 
         // send order confirmation email to customer
         emailTemplatesUtils.sendOrderEmail(customer.getEmailAddress(), customer, order, locale,
@@ -1622,6 +1627,7 @@ public class OrderFacadeImpl implements OrderFacade {
 
 
     @Override
+    @Transactional
     public void updateOrderProducts(Order order, List<PersistableOrderProduct> changedOrderProducts, MerchantStore merchantStore) {
         Validate.notNull(order, "order must not be null");
         Validate.notNull(changedOrderProducts, "changedOrderProducts must not be null");
@@ -1650,6 +1656,7 @@ public class OrderFacadeImpl implements OrderFacade {
                 if (persistableOrderProduct != null) {
                     int deltaQtty = persistableOrderProduct.getOrderedQuantity() - orderProduct.getProductQuantity();
                     orderProductPopulator.populate(persistableOrderProduct, orderProduct, order.getMerchant(), null);
+                    orderProductRepository.save(orderProduct);
                     Product p = productService.getBySku(persistableOrderProduct.getSku(), merchantStore);
                     if (p == null) {
                         throw new ResourceNotFoundException("Product with sku [" + persistableOrderProduct.getSku() + "] not found");
@@ -1660,10 +1667,6 @@ public class OrderFacadeImpl implements OrderFacade {
                     }
                     availability.setProductQuantity(availability.getProductQuantity() - deltaQtty);
                     productService.update(p);
-                    if (orderProduct.getProductQuantity() == 0) {
-                        order.getOrderProducts().remove(orderProduct);
-                    }
-
                     shoppingCartItem.setQuantity(persistableOrderProduct.getOrderedQuantity());
                     shoppingCartItem.setItemPrice(persistableOrderProduct.getPrice());
                     shoppingCartItem.getFinalPrice().setFinalPrice(persistableOrderProduct.getPrice());

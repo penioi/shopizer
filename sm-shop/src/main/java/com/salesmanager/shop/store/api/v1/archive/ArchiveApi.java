@@ -1,17 +1,21 @@
 package com.salesmanager.shop.store.api.v1.archive;
 
 import com.salesmanager.core.business.repositories.catalog.product.attribute.ProductOptionRepository;
+import com.salesmanager.core.business.services.catalog.product.manufacturer.ManufacturerService;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOption;
+import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.catalog.category.PersistableCategory;
+import com.salesmanager.shop.model.catalog.manufacturer.PersistableManufacturer;
 import com.salesmanager.shop.model.catalog.product.attribute.PersistableProductOption;
 import com.salesmanager.shop.model.entity.Entity;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.api.exception.UnauthorizedException;
 import com.salesmanager.shop.store.controller.category.facade.CategoryFacade;
+import com.salesmanager.shop.store.controller.manufacturer.facade.ManufacturerFacade;
 import com.salesmanager.shop.store.controller.product.facade.ProductOptionFacade;
 import com.salesmanager.shop.store.controller.product.facade.ProductOptionSetFacade;
 import com.salesmanager.shop.store.controller.user.facade.UserFacade;
@@ -69,6 +73,12 @@ public class ArchiveApi {
 
     @Inject
     private UserFacade userFacade;
+
+    @Inject
+    private ManufacturerService manufacturerService;
+
+    @Inject
+    private ManufacturerFacade manufacturerFacade;
     /**
      * To be used with MultipartFile
      *
@@ -114,6 +124,20 @@ public class ArchiveApi {
                 productOptionFacade.saveOption(option, merchantStore);
             });
 
+            List<PersistableManufacturer> manufacturers = (List<PersistableManufacturer>) result.get("manufacturer");
+            Optional.ofNullable(manufacturers).orElse(new ArrayList<>()).forEach( m -> {
+                Manufacturer existing = manufacturerService.getByCode(merchantStore, m.getCode());
+                if(existing != null) {
+                    m.setId(existing.getId());
+                }
+                try {
+                    manufacturerFacade.saveOrUpdateManufacturer(m, merchantStore, null);
+                } catch (Exception e) {
+                   logger.warn("Error saving manufacturer {}", m, e);
+                }
+            });
+
+            result.get("property_value");
 
         } catch (Exception e) {
             logger.error("Error while creating Categories", e);

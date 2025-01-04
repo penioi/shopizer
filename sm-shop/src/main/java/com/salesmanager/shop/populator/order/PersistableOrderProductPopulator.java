@@ -1,5 +1,6 @@
 package com.salesmanager.shop.populator.order;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,6 +93,7 @@ public class PersistableOrderProductPopulator extends
 
             target.setProductQuantity(source.getOrderedQuantity());
             target.setSku(source.getProduct().getSku());
+            target.setLastUpdated(new Date());
 
             OrderProductPrice orderProductPrice = target.getPrices().stream().findFirst().orElse(new OrderProductPrice());
             orderProductPrice.setDefaultPrice(true);

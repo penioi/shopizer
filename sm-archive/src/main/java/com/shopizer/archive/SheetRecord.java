@@ -32,6 +32,10 @@ public class SheetRecord {
         return Optional.ofNullable(this.rowByName.get(name)).map(RecordCell::pop).map(String::trim).orElse(null);
     }
 
+    public RecordCell getCell(String name) {
+        return this.rowByName.get(name);
+    }
+
     public Integer getInteger(String name) {
         return Optional.ofNullable(this.rowByName.get(name)).map(RecordCell::pop).map(String::trim).map(Float::valueOf).map(Float::intValue).orElse(null);
     }
@@ -78,17 +82,14 @@ public class SheetRecord {
         private int index;
         private String name;
         private List<String> values = new ArrayList<>();
-        private int currentIndex;
+        private int currentIndex = 0;
 
         public boolean hasValue() {
             return !this.values.isEmpty();
         }
 
         public String pop() {
-            if(this.values.size() == currentIndex) {
-                currentIndex = 0;
-            }
-            if(this.values.isEmpty()) {
+            if(this.values.isEmpty() || this.currentIndex == this.values.size()) {
                 return null;
             }
             return this.values.get(currentIndex++);
@@ -99,6 +100,10 @@ public class SheetRecord {
             return this;
         }
 
+        public RecordCell reset() {
+            this.currentIndex = 0;
+            return this;
+        }
         public static RecordCellBuilder builder() {
             return new RecordCellBuilder();
         }

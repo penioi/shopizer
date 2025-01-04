@@ -10,91 +10,70 @@ import com.salesmanager.core.business.services.catalog.product.attribute.Product
 import com.salesmanager.core.business.services.catalog.product.image.ProductImageService;
 import com.salesmanager.core.business.services.catalog.product.manufacturer.ManufacturerService;
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
-import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOption;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValue;
+import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
+import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.image.ProductImageDescription;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
-import com.salesmanager.core.model.catalog.category.Category;
-import com.salesmanager.shop.model.catalog.category.CategoryDescription;
-import com.salesmanager.shop.model.catalog.category.PersistableCategory;
-import com.salesmanager.shop.model.catalog.manufacturer.ManufacturerDescription;
-import com.salesmanager.shop.model.catalog.manufacturer.PersistableManufacturer;
 import com.salesmanager.shop.model.catalog.product.product.PersistableProduct;
 import com.salesmanager.shop.store.controller.product.facade.ProductOptionSetFacade;
 import com.shopizer.archive.SheetRecord.RecordCell;
-
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.sl.draw.geom.GuideIf.Op;
-import org.checkerframework.checker.nullness.Opt;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.management.RuntimeErrorException;
 
 @Service
 @Slf4j
 public class ProductsParser implements CatalogParser<PersistableProduct> {
 
-    public String getEntityName() {
-        return "product";
-    }
-
     @Inject
     private Import anImport;
-
     @Autowired
     private ProductService productService;
     @Autowired
     private ManufacturerService manufacturerService;
     @Autowired
     private CategoryService categoryStoreService;
-
     @Autowired
     private ProductOptionSetFacade optionSetFacade;
-
     @Autowired
     private ProductTypeService productTypeService;
-
     @Autowired
     private ProductOptionService productOptionService;
-
     @Autowired
     private ProductOptionValueService productOptionValueService;
-
     @Autowired
     private ProductAttributeService productAttributeService;
-
     @Autowired
     private ProductImageService productImageService;
+
+    public String getEntityName() {
+        return "product";
+    }
     /*
      * field_code field_name_en field_description_en price friendly_url metaTitle
      * metaDescription
-     * 
+     *
      * feature_availability_range feature_category feature_certifications
      * feature_collections feature_colour feature_composition feature_construction
      * feature_drape feature_kk_id feature_maeba_classif
@@ -102,14 +81,14 @@ public class ProductsParser implements CatalogParser<PersistableProduct> {
      * feature_metres_available feature_new feature_old_price feature_on_homepage
      * feature_origin feature_other_features feature_pattern
      * feature_perceived_weight
-     * 
+     *
      * feature_price_range feature_resistance_to_crease feature_seasonality
      * feature_shipping_from feature_description feature_softness feature_stretch
      * feature_supplier_code feature_supplier_name
      * feature_sustainability_credentials feature_swatches_available
      * feature_type_of_fabric feature_unit feature_unit_description feature_warp
      * feature_weft feature_weight_in_g feature_width product_img_gallery
-     * 
+     *
      */
 
     public List<PersistableProduct> parse(MerchantStore store, Map<Integer, SheetRecord> data) {
@@ -130,7 +109,7 @@ public class ProductsParser implements CatalogParser<PersistableProduct> {
         }
         try {
             for (SheetRecord sheetRecord : combinedData) {
-              
+
                 try {
                     String code = sheetRecord.get("field_code");
                     log.info("Create PersistableProduct  {} ", code);
@@ -140,8 +119,9 @@ public class ProductsParser implements CatalogParser<PersistableProduct> {
                     for (Language l : languages) {
                         ProductDescription pd = currentProduct.getDescriptions().stream()
                                 .filter(d -> d.getLanguage().equals(l)).findFirst().orElse(new ProductDescription());
-                        pd.setTitle(sheetRecord.get("field_name_" + l.getCode()));
-                        pd.setName(sheetRecord.get("field_name_" + l.getCode()));
+                        String name = sheetRecord.get("field_name_" + l.getCode());
+                        pd.setTitle(name);
+                        pd.setName(name);
                         pd.setDescription(sheetRecord.get("field_description_" + l.getCode()));
                         pd.setMetatagTitle(sheetRecord.get("metaTilte"));
                         pd.setMetatagDescription(sheetRecord.get("metaDescription"));
@@ -192,22 +172,40 @@ public class ProductsParser implements CatalogParser<PersistableProduct> {
                             System.out.println("WARN - No Product Option " + cell.getName().replace("feature_", ""));
                             continue;
                         }
-                        String valueCode = cell.pop();
-                        valueCode = valueCode.startsWith(po.getCode()) ? valueCode : po.getCode() + "_" + valueCode;
-                        ProductOptionValue optionValue = productOptionValueService.getByCode(store, valueCode);
-                        if (optionValue != null) {
-                            ProductAttribute attribute = currentProduct.getAttributes().stream()
-                                    .filter(attr -> attr.getProductOption() != null
-                                            && attr.getProductOption().getCode().equals(po.getCode())
-                                            && attr.getProductOptionValue().getCode().equals(optionValue.getCode()))
-                                    .findFirst().orElse(new ProductAttribute());
-                            attribute.setProductOption(po);
-                            attribute.setAttributeDisplayOnly(true);
-                            attribute.setProductOptionValue(optionValue);
-                            attribute.setProduct(currentProduct);
-                            productProperites.add(attribute);
+
+                        for(String value : cell.getValues()) {
+                            if (StringUtils.isNotEmpty(value)) {
+                                String valueCode = value.startsWith(po.getCode()) ? value : po.getCode() + "_" + value;
+                                valueCode = valueCode.replaceAll("[^\\w\\d]", "_");
+
+                                ProductOptionValue optionValue = Optional.ofNullable(productOptionValueService.getByCode(store, valueCode)).orElse(new ProductOptionValue());
+                                if (optionValue.getId() == null) {
+                                    optionValue.setMerchantStore(store);
+                                    optionValue.setProductOptionDisplayOnly(true);
+                                    optionValue.setCode(valueCode);
+                                    ProductOptionValueDescription description = new ProductOptionValueDescription();
+                                    description.setLanguage(languages.get(0));
+                                    description.setProductOptionValue(optionValue);
+                                    description.setTitle(value);
+                                    description.setName(value);
+                                    optionValue.getDescriptions().add(description);
+                                    productOptionValueService.saveOrUpdate(optionValue);
+                                }
+                                ProductAttribute attribute = currentProduct.getAttributes().stream()
+                                        .filter(attr -> attr.getProductOption() != null
+                                                && attr.getProductOption().getCode().equals(po.getCode())
+                                                && attr.getProductOptionValue().getCode().equals(optionValue.getCode()))
+                                        .findFirst().orElse(new ProductAttribute());
+                                attribute.setProductOption(po);
+                                attribute.setAttributeDisplayOnly(true);
+                                attribute.setProductOptionValue(optionValue);
+                                attribute.setProduct(currentProduct);
+                                productProperites.add(attribute);
+                            }
                         }
+
                     }
+
                     currentProduct.getAttributes().clear();
                     currentProduct.getAttributes().addAll(productProperites);
 
@@ -216,10 +214,34 @@ public class ProductsParser implements CatalogParser<PersistableProduct> {
                     } catch (ServiceException e) {
                         e.printStackTrace();
                     }
-                } catch (Exception ex) {
-                    log.error(" ERROR INSERTING PRODUCT {} " + sheetRecord,  ex);
-                }
 
+                    RecordCell imgFilenames = sheetRecord.getCell("product_img_gallery_file");
+                    RecordCell imgDescriptions = sheetRecord.getCell("product_img_gallery_description_en");
+                    if (imgFilenames != null) {
+                        String imgFname;
+                        while ((imgFname = imgFilenames.pop()) != null) {
+                            final String fileName = imgFname;
+                            ProductImage productImage = currentProduct.getImages().stream().filter(pi -> pi.getProductImage().equals(fileName)).findFirst().orElse(new ProductImage());
+                            productImage.setProduct(currentProduct);
+                            productImage.setProductImageUrl(imgFname);
+                            productImage.setProductImage(imgFname);
+                            String description = imgDescriptions.hasValue() ? imgDescriptions.pop() : null;
+                            if (description != null) {
+                                ProductImageDescription piDescription = productImage.getDescriptions().stream().findFirst().orElse(new ProductImageDescription());
+                                piDescription.setDescription(description);
+                                piDescription.setName(description);
+                                piDescription.setAltTag(description);
+                                piDescription.setLanguage(languages.get(0));
+                                productImage.getDescriptions().add(piDescription);
+                                piDescription.setProductImage(productImage);
+                            }
+                            productImageService.save(productImage);
+                        }
+                    }
+
+                } catch (Exception ex) {
+                    log.error("ERROR INSERTING PRODUCT {} " + sheetRecord, ex);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,8 +1,11 @@
 package com.salesmanager.core.model.order.orderproduct;
 
 import com.salesmanager.core.model.user.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -13,6 +16,9 @@ import java.util.Date;
 
 @Data // Lombok
 @EqualsAndHashCode
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name="ORDER_PRODUCT_HISTORY" )
 public class OrderProductHistory implements Serializable {
@@ -25,8 +31,7 @@ public class OrderProductHistory implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_CREATED")
-    @CreatedDate
-    private Date dateCreated;
+    private Date dateCreated = new Date();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORDER_PRODUCT_ID", nullable = false)
@@ -35,11 +40,20 @@ public class OrderProductHistory implements Serializable {
     @Column(name = "PRODUCT_QUANTITY")
     private Integer productQuantity;
 
+    @Column(name = "PRODUCT_QUANTITY_OLD")
+    private Integer productQuantityOld;
+
     @Column(name = "PRODUCT_PRICE")
     private BigDecimal price;
 
+    @Column(name = "PRODUCT_PRICE_OLD")
+    private BigDecimal priceOld;
+
     @Column(name = "USER")
-    @CreatedBy
     private String user;
 
+    public boolean hasChange() {
+        return  (priceOld != null && price != null && !priceOld.equals(price))
+                || productQuantityOld != null && productQuantity != null && !productQuantityOld.equals(productQuantity);
+    }
 }

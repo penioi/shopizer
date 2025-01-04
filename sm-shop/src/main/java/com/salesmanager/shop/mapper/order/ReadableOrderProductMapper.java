@@ -155,6 +155,8 @@ public class ReadableOrderProductMapper implements Mapper<OrderProduct, Readable
             List<ReadableOrderProductHistory> history = source.getHistory().stream()
                     .map(historyItem -> ReadableOrderProductHistory.builder()
                             .productQuantity(historyItem.getProductQuantity())
+                            .productQuantityOld(historyItem.getProductQuantityOld())
+                            .productPriceOld(historyItem.getPriceOld())
                             .productPrice(historyItem.getPrice()).build()).collect(Collectors.toList());
             target.setHistory(history);
         }

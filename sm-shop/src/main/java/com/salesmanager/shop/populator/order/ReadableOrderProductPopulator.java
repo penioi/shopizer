@@ -14,6 +14,7 @@ import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.order.ReadableOrderProduct;
 import com.salesmanager.shop.model.order.ReadableOrderProductAttribute;
+import com.salesmanager.shop.model.order.ReadableOrderProductHistory;
 import com.salesmanager.shop.populator.catalog.ReadableProductPopulator;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.utils.ImageFilePath;
@@ -24,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Use mappers
@@ -33,11 +35,10 @@ import java.util.Set;
 @Deprecated
 public class ReadableOrderProductPopulator extends
 		AbstractDataPopulator<OrderProduct, ReadableOrderProduct> {
-	
+
 	private ProductService productService;
 	private PricingService pricingService;
 	private ImageFilePath imageUtils;
-
 
 
 	public ImageFilePath getimageUtils() {
@@ -50,9 +51,9 @@ public class ReadableOrderProductPopulator extends
 
 	@Override
 	public ReadableOrderProduct populate(OrderProduct source,
-			ReadableOrderProduct target, MerchantStore store, Language language)
+										 ReadableOrderProduct target, MerchantStore store, Language language)
 			throws ConversionException {
-		
+
 		Validate.notNull(productService,"Requires ProductService");
 		Validate.notNull(pricingService,"Requires PricingService");
 		Validate.notNull(imageUtils,"Requires imageUtils");
@@ -65,18 +66,18 @@ public class ReadableOrderProductPopulator extends
 		}
 		target.setProductName(source.getProductName());
 		target.setSku(source.getSku());
-		
+
 		//subtotal = price * quantity
 		BigDecimal subTotal = source.getOneTimeCharge();
 		subTotal = subTotal.multiply(new BigDecimal(source.getProductQuantity()));
-		
+
 		try {
 			String subTotalPrice = pricingService.getDisplayAmount(subTotal, store);
 			target.setSubTotal(subTotalPrice);
 		} catch(Exception e) {
 			throw new ConversionException("Cannot format price",e);
 		}
-		
+
 		if(source.getOrderAttributes()!=null) {
 			List<ReadableOrderProductAttribute> attributes = new ArrayList<ReadableOrderProductAttribute>();
 			for(OrderProductAttribute attr : source.getOrderAttributes()) {
@@ -87,53 +88,63 @@ public class ReadableOrderProductPopulator extends
 				} catch (ServiceException e) {
 					throw new ConversionException("Cannot format price",e);
 				}
-				
+
 				readableAttribute.setAttributeName(attr.getProductAttributeName());
 				readableAttribute.setAttributeValue(attr.getProductAttributeValueName());
 				attributes.add(readableAttribute);
 			}
 			target.setAttributes(attributes);
 		}
-		
 
-			String productSku = source.getSku();
-			if(!StringUtils.isBlank(productSku)) {
-				Product product = null;
-				try {
-					product = productService.getBySku(productSku, store, language);
-				} catch (ServiceException e) {
-					throw new ServiceRuntimeException(e);
-				}
-				if(product!=null) {
-					
-					
-					
-					ReadableProductPopulator populator = new ReadableProductPopulator();
-					populator.setPricingService(pricingService);
-					populator.setimageUtils(imageUtils);
-					
-					ReadableProduct productProxy = populator.populate(product, new ReadableProduct(), store, language);
-					target.setProduct(productProxy);
-					
-					Set<ProductImage> images = product.getImages();
-					ProductImage defaultImage = null;
-					if(images!=null) {
-						for(ProductImage image : images) {
-							if(defaultImage==null) {
-								defaultImage = image;
-							}
-							if(image.isDefaultImage()) {
-								defaultImage = image;
-							}
+
+		String productSku = source.getSku();
+		if(!StringUtils.isBlank(productSku)) {
+			Product product = null;
+			try {
+				product = productService.getBySku(productSku, store, language);
+			} catch (ServiceException e) {
+				throw new ServiceRuntimeException(e);
+			}
+			if(product!=null) {
+
+
+				ReadableProductPopulator populator = new ReadableProductPopulator();
+				populator.setPricingService(pricingService);
+				populator.setimageUtils(imageUtils);
+
+				ReadableProduct productProxy = populator.populate(product, new ReadableProduct(), store, language);
+				target.setProduct(productProxy);
+
+				Set<ProductImage> images = product.getImages();
+				ProductImage defaultImage = null;
+				if(images!=null) {
+					for(ProductImage image : images) {
+						if(defaultImage==null) {
+							defaultImage = image;
+						}
+						if(image.isDefaultImage()) {
+							defaultImage = image;
 						}
 					}
-					if(defaultImage!=null) {
-						target.setImage(defaultImage.getProductImage());
-					}
+				}
+				if(defaultImage!=null) {
+					target.setImage(defaultImage.getProductImage());
 				}
 			}
-		
-		
+		}
+		// hystory
+		List<ReadableOrderProductHistory> history = source.getHistory().stream().map( h -> {
+			ReadableOrderProductHistory readableOrderProductHistory = ReadableOrderProductHistory.builder()
+					.productQuantity(h.getProductQuantity())
+					.productPrice(h.getPrice())
+					.dateCreated(h.getDateCreated())
+					.productPriceOld(h.getPriceOld())
+					.productQuantityOld(h.getProductQuantityOld())
+					.user(h.getUser())
+					.build();
+			return readableOrderProductHistory;
+		}).collect(Collectors.toList());
+		target.setHistory(history);
 		return target;
 	}
 
@@ -150,7 +161,7 @@ public class ReadableOrderProductPopulator extends
 	public void setProductService(ProductService productService) {
 		this.productService = productService;
 	}
-	
+
 	public PricingService getPricingService() {
 		return pricingService;
 	}

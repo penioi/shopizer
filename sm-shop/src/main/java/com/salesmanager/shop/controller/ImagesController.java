@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,6 +193,9 @@ public class ImagesController {
 		if(image!=null) {
 			return image.getFile().toByteArray();
 		} else {
+			File f = new File("static/images/" + imageName + "." + extension);
+
+			if(f.exists()) return FileUtils.readFileToByteArray(f);
 			//empty image placeholder
 			return tempImage;
 		}

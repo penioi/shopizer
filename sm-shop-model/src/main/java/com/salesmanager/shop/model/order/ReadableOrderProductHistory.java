@@ -14,10 +14,10 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class ReadableOrderProductHistory {
-
     private Date dateCreated;
     private String user;
     private Integer productQuantity;
+    private Integer productQuantityOld;
     private BigDecimal productPrice;
-
+    private BigDecimal productPriceOld;
 }

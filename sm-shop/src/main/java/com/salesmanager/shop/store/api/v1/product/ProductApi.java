@@ -195,19 +195,11 @@ public class ProductApi {
 			@RequestParam(value = "optionValues", required = false) List<Long> optionValueIds,
 			@RequestParam(value = "status", required = false) String status,
 			@RequestParam(value = "owner", required = false) Long owner,
-			@RequestParam(value = "page", required = false, defaultValue = "0") Integer page, // current
+			@RequestParam(value = "page", required = false, defaultValue = "1") Integer page, // current
 			@RequestParam(value = "origin", required = false, defaultValue = ProductCriteria.ORIGIN_SHOP) String origin,
-			// page
-			// 0
-			// ..
-			// n
-			// allowing
-			// navigation
 			@RequestParam(value = "count", required = false, defaultValue = "100") Integer count, // count
 			@RequestParam(value = "slug", required = false) String slug, // category slug
 			@RequestParam(value = "available", required = false) Boolean available,
-			// per
-			// page
 			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
@@ -276,18 +268,17 @@ public class ProductApi {
 
 		try {
 			return productFacade.getProductListsByCriterias(merchantStore, language, criteria);
-
 		} catch (Exception e) {
-
 			LOGGER.error("Error while filtering products product", e);
 			try {
 				response.sendError(503, "Error while filtering products " + e.getMessage());
 			} catch (Exception ignore) {
 			}
-
 			return null;
 		}
 	}
+
+
 
 	/**
 	 * API for getting a product

@@ -27,6 +27,7 @@ import com.salesmanager.core.model.common.GenericEntityList;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.tax.taxclass.TaxClass;
+import org.springframework.cache.annotation.Cacheable;
 
 public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
@@ -204,6 +205,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
 	}
 
+	@Cacheable("productBySeUrl")
 	public Product getByFriendlyUrl(MerchantStore store, String seUrl, Locale locale) {
 
 		List<String> regionList = new ArrayList<>();
@@ -574,6 +576,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	 * @param max
 	 * @return
 	 */
+//	@Cacheable("productsByCriteria")
 	@Override
 	public ProductList listByStore(MerchantStore store, Language language, ProductCriteria criteria) {
 
@@ -751,22 +754,22 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		qs.append("select distinct p from Product as p ");
 		qs.append("join fetch p.merchantStore merch ");
 		qs.append("join fetch p.availabilities pa ");
-		qs.append("left join fetch pa.prices pap ");
-		qs.append("left join fetch pap.descriptions papd ");
+//		qs.append("left join fetch pa.prices pap ");
+//		qs.append("left join fetch pap.descriptions papd ");
 
 		qs.append("left join fetch p.descriptions pd ");
 		qs.append("left join fetch p.categories categs ");
-		qs.append("left join fetch categs.descriptions cd ");
+//		qs.append("left join fetch categs.descriptions cd ");
 		
 
 		// images
-		qs.append("left join fetch p.images images ");
+//		qs.append("left join fetch p.images images ");
 
 		// other lefts
 		qs.append("left join fetch p.manufacturer manuf ");
-		qs.append("left join fetch manuf.descriptions manufd ");
-		qs.append("left join fetch p.type type ");
-		qs.append("left join fetch p.taxClass tx ");
+//		qs.append("left join fetch manuf.descriptions manufd ");
+//		qs.append("left join fetch p.type type ");
+//		qs.append("left join fetch p.taxClass tx ");
 
 		// RENTAL
 		//qs.append("left join fetch p.owner owner ");
@@ -791,7 +794,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		/**
 		 * variants
-		 */
+
 		if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP)) {
 			qs.append(" left join fetch p.variants pinst ");
 			qs.append(" left join fetch pinst.variation pv ");
@@ -814,7 +817,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append(" left join fetch pinstg.images pinstgimg ");
 			qs.append(" left join fetch pinstgimg.descriptions ");
 		//end variants
-		}
+		}	 */
 
 		/** not required at list level **/
 		//qs.append(" left join fetch p.relationships pr");

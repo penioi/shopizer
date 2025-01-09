@@ -51,6 +51,7 @@
 		<beans:entry key="stripe" value-ref="stripe" />
 		<beans:entry key="stripe3" value-ref="stripe3" />
 		<beans:entry key="braintree" value-ref="braintree" />
+		<beans:entry key="invoice" value-ref="invoice" />
 	</util:map>
 
 	<!-- Shipping -->

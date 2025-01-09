@@ -154,7 +154,6 @@ public class PaymentServiceImpl implements PaymentService {
 				return module;
 			}
 		}
-		
 		return null;
 	}
 	
@@ -176,7 +175,6 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		
 		return null;
-		
 	}
 	
 
@@ -324,33 +322,26 @@ public class PaymentServiceImpl implements PaymentService {
 		if(!configuration.isActive()) {
 			throw new ServiceException("Payment module " + payment.getModuleName() + " is not active");
 		}
-		
+
+
+		PaymentModule module = this.paymentModules.get(payment.getModuleName());
+		if(module == null) {
+			throw new ServiceException("Payment module " + payment.getModuleName() + " does not exist");
+		}
+
 		String sTransactionType = configuration.getIntegrationKeys().get("transaction");
-		if(sTransactionType==null) {
-			sTransactionType = TransactionType.AUTHORIZECAPTURE.name();
+		if(sTransactionType == null ) {
+			sTransactionType = module.getInitialTransactionType().name();
 		}
 		
 		try {
 			TransactionType.valueOf(sTransactionType);
 		} catch(IllegalArgumentException ie) {
 			LOGGER.warn("Transaction type " + sTransactionType + " does noe exist, using default AUTHORIZECAPTURE");
-			sTransactionType = "AUTHORIZECAPTURE";
+			sTransactionType = module.getInitialTransactionType().name();
 		}
 
-		
-
-		if(sTransactionType.equals(TransactionType.AUTHORIZE.name())) {
-			payment.setTransactionType(TransactionType.AUTHORIZE);
-		} else {
-			payment.setTransactionType(TransactionType.AUTHORIZECAPTURE);
-		} 
-		
-
-		PaymentModule module = this.paymentModules.get(payment.getModuleName());
-		
-		if(module==null) {
-			throw new ServiceException("Payment module " + payment.getModuleName() + " does not exist");
-		}
+		TransactionType transactionType = TransactionType.valueOf(sTransactionType);
 		
 		if(payment instanceof CreditCardPayment && "true".equals(coreConfiguration.getProperty("VALIDATE_CREDIT_CARD"))) {
 			CreditCardPayment creditCardPayment = (CreditCardPayment)payment;
@@ -358,8 +349,7 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		
 		IntegrationModule integrationModule = getPaymentMethodByCode(store,payment.getModuleName());
-		TransactionType transactionType = TransactionType.valueOf(sTransactionType);
-		if(transactionType==null) {
+		if(transactionType == null) {
 			transactionType = payment.getTransactionType();
 			if(transactionType.equals(TransactionType.CAPTURE.name())) {
 				throw new ServiceException("This method does not allow to process capture transaction. Use processCapturePayment");
@@ -376,10 +366,8 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 
 
-		if(transactionType != TransactionType.INIT) {
-			transactionService.create(transaction);
-		}
-		
+		transactionService.create(transaction);
+
 		if(transactionType == TransactionType.AUTHORIZECAPTURE)  {
 			order.setStatus(OrderStatus.ORDERED);
 			if(!payment.getPaymentType().name().equals(PaymentType.MONEYORDER.name())) {

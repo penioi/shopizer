@@ -226,7 +226,7 @@ public class ProductsParser implements CatalogParser<PersistableProduct> {
                             productImage.setProductImageUrl(imgFname);
                             productImage.setProductImage(imgFname);
                             String description = imgDescriptions.hasValue() ? imgDescriptions.pop() : null;
-                            if (description != null) {
+                            if (StringUtils.isNotBlank(description)) {
                                 ProductImageDescription piDescription = productImage.getDescriptions().stream().findFirst().orElse(new ProductImageDescription());
                                 piDescription.setDescription(description);
                                 piDescription.setName(description);

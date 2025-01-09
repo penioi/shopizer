@@ -25,10 +25,10 @@ public class RepositoryHelper {
                 q.setMaxResults(Math.min(criteria.getMaxCount(), count.intValue()));
             }
         } else {
-            int firstResult = ( (criteria.getStartPage() == 0 ? 1 : criteria.getStartPage()) - 1) * criteria.getPageSize();
+            int firstResult = (criteria.getStartPage() - 1)  * criteria.getPageSize();
             q.setFirstResult(firstResult);
             q.setMaxResults(criteria.getPageSize());
-            int lastPageNumber = (count.intValue() / criteria.getPageSize()) + 1;
+            int lastPageNumber = (int) Math.ceil(count.doubleValue() / criteria.getPageSize());
             entityList.setTotalPages(lastPageNumber);
             entityList.setTotalCount(count.intValue());
         }

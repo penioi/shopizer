@@ -441,7 +441,7 @@ public class OrderFacadeImpl implements OrderFacade {
             payment.setModuleName(order.getPaymentModule());
             payment.setCurrency(modelOrder.getCurrency());
 
-            if (order.getPayment() != null && order.getPayment().get("paymentToken") != null) {// set
+                if (order.getPayment() != null && order.getPayment().get("paymentToken") != null) {// set
                 // token
                 String paymentToken = order.getPayment().get("paymentToken");
                 Map<String, String> paymentMetaData = new HashMap<String, String>();
@@ -1256,18 +1256,13 @@ public class OrderFacadeImpl implements OrderFacade {
             }
 
             String submittedAmount = order.getPayment().getAmount();
-
             BigDecimal formattedSubmittedAmount = productPriceUtils.getAmount(submittedAmount);
-
-            BigDecimal submitedAmountFormat = productPriceUtils.getAmount(submittedAmount);
 
             BigDecimal calculatedAmount = orderTotalSummary.getTotal();
             String strCalculatedTotal = calculatedAmount.toPlainString();
 
             // compare both prices
             if (calculatedAmount.compareTo(formattedSubmittedAmount) != 0) {
-
-
                 throw new ConversionException("Payment.amount does not match what the system has calculated "
                         + strCalculatedTotal + " (received " + submittedAmount + ") please recalculate the order and submit again");
             }
@@ -1454,10 +1449,11 @@ public class OrderFacadeImpl implements OrderFacade {
             history.setOrder(order);
             history.setStatus(status.getStatus());
 
+            order.setStatus(status.getStatus());
             orderService.addOrderStatusHistory(order, history);
 
         } catch (Exception e) {
-            throw new ServiceRuntimeException("An error occured while converting orderstatushistory", e);
+            throw new ServiceRuntimeException("An error occurred while converting orderstatushistory", e);
         }
 
     }
@@ -1619,6 +1615,7 @@ public class OrderFacadeImpl implements OrderFacade {
 
         try {
             orderService.addOrderStatusHistory(order, history);
+            orderService.saveOrUpdate(order);
         } catch (ServiceException e) {
             e.printStackTrace();
         }

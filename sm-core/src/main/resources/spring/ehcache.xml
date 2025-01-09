@@ -35,9 +35,17 @@
     	
      <cache name="zoneByCode" maxElementsInMemory="800" eternal="false"
     	overflowToDisk="false" memoryStoreEvictionPolicy="LFU" />
-    	
-     <cache name="languageByCode" maxElementsInMemory="50" eternal="false"
-    	overflowToDisk="false" memoryStoreEvictionPolicy="LFU" />
+
+    <cache name="languageByCode" maxElementsInMemory="50" eternal="false"
+           overflowToDisk="false" memoryStoreEvictionPolicy="LFU" />
+
+    <cache name="productBySeUrl" maxElementsInMemory="500" eternal="false"
+           overflowToDisk="false" memoryStoreEvictionPolicy="LFU" />
+
+    <cache name="productsByCriteria" maxElementsInMemory="500" eternal="false"
+           overflowToDisk="false" memoryStoreEvictionPolicy="LFU" />
+
+
 
 
 </ehcache>

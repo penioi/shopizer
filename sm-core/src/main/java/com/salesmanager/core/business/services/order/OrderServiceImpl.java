@@ -16,6 +16,7 @@ import com.salesmanager.core.business.services.tax.TaxService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.price.FinalPrice;
+import com.salesmanager.core.model.catalog.product.price.ProductPriceType;
 import com.salesmanager.core.model.common.UserContext;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -188,15 +189,12 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
                         || ( availability.getProductQuantityOrderMin() > 0 && orderProduct.getProductQuantity() < availability.getProductQuantityOrderMin())
                         || ( availability.getProductQuantityOrderMax() > 0 && orderProduct.getProductQuantity() > availability.getProductQuantityOrderMax()))  {
                      throw new ServiceException(ServiceException.EXCEPTION_INVENTORY_MISMATCH);
-                    //LOGGER.error("APP-BACKEND [" + ServiceException.EXCEPTION_INVENTORY_MISMATCH + "]");
                 }
                 qty = qty - orderProduct.getProductQuantity();
                 availability.setProductQuantity(qty);
             }
             productService.update(p);
         }
-
-
         return order;
     }
 
@@ -209,7 +207,7 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
         ShippingConfiguration shippingConfiguration = null;
 
         BigDecimal grandTotal = new BigDecimal(0);
-        grandTotal.setScale(2, RoundingMode.HALF_UP);
+        grandTotal = grandTotal.setScale(2, RoundingMode.HALF_UP);
 
         //price by item
         /**
@@ -217,7 +215,7 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
          * subtotal
          */
         BigDecimal subTotal = new BigDecimal(0);
-        subTotal.setScale(2, RoundingMode.HALF_UP);
+        subTotal = subTotal.setScale(2, RoundingMode.HALF_UP);
         for (ShoppingCartItem item : summary.getProducts()) {
 
             BigDecimal st = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
@@ -245,12 +243,12 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
                             BigDecimal orderTotalValue = itemSubTotal.getValue();
                             if (orderTotalValue == null) {
                                 orderTotalValue = new BigDecimal(0);
-                                orderTotalValue.setScale(2, RoundingMode.HALF_UP);
+                                orderTotalValue = orderTotalValue.setScale(2, RoundingMode.HALF_UP);
                             }
 
                             orderTotalValue = orderTotalValue.add(price.getFinalPrice());
                             itemSubTotal.setValue(orderTotalValue);
-                            if (price.getProductPrice().getProductPriceType().name().equals(OrderValueType.ONE_TIME)) {
+                            if (price.getProductPrice().getProductPriceType().equals(ProductPriceType.ONE_TIME)) {
                                 subTotal = subTotal.add(price.getFinalPrice());
                             }
                         }
@@ -299,8 +297,6 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
 
         //shipping
         if (summary.getShippingSummary() != null) {
-
-
             OrderTotal shippingSubTotal = new OrderTotal();
             shippingSubTotal.setModule(Constants.OT_SHIPPING_MODULE_CODE);
             shippingSubTotal.setOrderTotalType(OrderTotalType.SHIPPING);
@@ -552,13 +548,12 @@ public class OrderServiceImpl extends SalesManagerEntityServiceImpl<Long, Order>
     public void saveOrUpdate(final Order order) throws ServiceException {
 
         if (order.getId() != null && order.getId() > 0) {
-            LOGGER.debug("Updating Order");
+            LOGGER.debug("Updating Order {}", order);
             super.update(order);
 
         } else {
-            LOGGER.debug("Creating Order");
+            LOGGER.debug("Creating Order {}", order);
             super.create(order);
-
         }
     }
 

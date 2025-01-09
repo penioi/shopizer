@@ -1,6 +1,12 @@
 package com.salesmanager.shop.store.api.v1.product;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -52,6 +58,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import springfox.documentation.annotations.ApiIgnore;
+
 
 @Controller
 @RequestMapping("/api/v1")
@@ -221,12 +228,12 @@ public class ProductImageApi {
 		Product p = productService.retrieveById(id, merchantStore).orElse(null);
 
 		if(p==null) {
-				throw new ResourceNotFoundException("Product images not found for product id [" + id
+			throw new ResourceNotFoundException("Product images not found for product id [" + id
 					+ "] and merchant [" + merchantStore.getCode() + "]");
 		}
 
-			if(p.getMerchantStore().getId() != merchantStore.getId()) {
-				throw new ResourceNotFoundException("Product images not found for product id [" + id
+		if(p.getMerchantStore().getId() != merchantStore.getId()) {
+			throw new ResourceNotFoundException("Product images not found for product id [" + id
 					+ "] and merchant [" + merchantStore.getCode() + "]");
 		}
 
@@ -302,6 +309,26 @@ public class ProductImageApi {
 			LOGGER.error("Error while deleting ProductImage", e);
 			throw new ServiceRuntimeException("ProductImage [" + imageId + "] cannot be edited");
 		}
+	}
+
+
+	//@RequestMapping(value = "/scrapethefiles", method =  RequestMethod.GET)
+	public List<String> scrape() throws IOException {
+		List<ProductImage> images = productImageService.list();
+		List<String> existing = Files.list(Path.of("static/images/")).map(p -> p.getFileName().toString()).toList();
+		List<String> fileNames = images.stream().map(ProductImage::getProductImageUrl).filter(f -> !existing.contains(f)).toList();
+		String baseUrl = "https://www.thematerialist.co/MTF/Content/Catalog/fabricsociety/fabrics/a/PRODUCTS/thumb/";
+		List<String> saved = new ArrayList<>();
+		for(String file : fileNames) {
+			try (InputStream in = new URL(baseUrl + file).openStream()){
+				Files.copy(in, Paths.get("static/images/" + file), StandardCopyOption.REPLACE_EXISTING);
+				System.out.println("Saved image " + Paths.get("static/images/" + file).toString());
+				saved.add(Paths.get("static/images/" + file).toString());
+			} catch (Throwable t) {
+				System.out.println("Failed to get " + file);
+			}
+		}
+		return saved;
 	}
 
 }

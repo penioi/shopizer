@@ -45,8 +45,9 @@ public class CategoriesParser implements  CatalogParser<PersistableCategory>{
                     }
                     CategoryDescription description = new CategoryDescription();
                     description.setLanguage(language);
-                    description.setTitle(sheetRecord.get("name_" + language));
-                    description.setName(sheetRecord.get("name_" + language));
+                    String title = sheetRecord.get("name_" + language);
+                    description.setTitle(title);
+                    description.setName(title);
                     if (sheetRecord.hasValue("description_" + language)) {
                         description.setDescription(sheetRecord.get("description_" + language));
                     }
@@ -65,7 +66,7 @@ public class CategoriesParser implements  CatalogParser<PersistableCategory>{
 
                 categories.put(category.getCode(), category);
 
-                if (!StringUtils.isBlank(sheetRecord.get("parent"))) {
+                if (sheetRecord.hasValue("parent")) {
                     PersistableCategory parent = categories.get(sheetRecord.get("parent"));
                     if (parent != null) {
                         Category parentCategory = new Category();

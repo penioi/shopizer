@@ -43,7 +43,9 @@ public class ProductOptionValuesParser implements CatalogParser<PersistableProdu
     public List<PersistableProductOptionValue> parse(MerchantStore store, Map<Integer, SheetRecord> data) {
         List<PersistableProductOptionValue> ppovList =  data.entrySet().stream().map( entry -> {
             SheetRecord value = entry.getValue();
-            String ppovCode = value.get("property") + "_" + value.get("code");
+            String property = value.get("property");
+            String code = value.get("code");
+            String ppovCode = property + "_" + code;
             ProductOptionValue ppov = Optional.ofNullable(productOptionValueService.getByCode(store, ppovCode)).orElse(new ProductOptionValue()) ;
             ppov.setCode(ppovCode);
             ppov.setMerchantStore(store);
@@ -53,19 +55,21 @@ public class ProductOptionValuesParser implements CatalogParser<PersistableProdu
             } else {
                 ppov.getDescriptions().add(description);
             }
-            description.setName(value.get("name_" + store.getLanguages().get(0).getCode()));
-            description.setDescription(value.get("description_" + store.getLanguages().get(0).getCode()));
-            description.setTitle(value.get("name_" + store.getLanguages().get(0).getCode()));
+            String name = value.get("name_" + store.getLanguages().get(0).getCode());
+            description.setName(name);
+            String descriptionSheet = value.get("description_" + store.getLanguages().get(0).getCode());
+            description.setDescription(descriptionSheet);
+            description.setTitle(name);
             description.setLanguage(store.getLanguages().get(0));
             description.setProductOptionValue(ppov);
-            ProductOptionSet optionSet = productOptionSetService.getCode(store, value.get("property"));
+            ProductOptionSet optionSet = productOptionSetService.getCode(store, property);
             if(optionSet == null) {
                 optionSet = new ProductOptionSet();
-                optionSet.setCode(value.get("property"));
+                optionSet.setCode(property);
             }
-            ProductOption productOption = productOptionService.getByCode(store, value.get("property"));
+            ProductOption productOption = productOptionService.getByCode(store, property);
             if(productOption == null) {
-                log.error("Failed to find productOption with code {}", value.get("property"));
+                log.error("Failed to find productOption with code {}", property);
             } else {
                 try {
                     productOptionValueService.save(ppov);

@@ -194,8 +194,8 @@ public class ImagesController {
 			return image.getFile().toByteArray();
 		} else {
 			File f = new File("static/images/" + imageName + "." + extension);
-
 			if(f.exists()) return FileUtils.readFileToByteArray(f);
+			LOGGER.warn("Static image not found {}", f.getAbsolutePath());
 			//empty image placeholder
 			return tempImage;
 		}

@@ -1,13 +1,14 @@
 # Shopizer 3.X (for java 1.11 +) (tested with Java 11, 16 and 17)
 
-> [!NOTE]
-> The team is working on an upcoming efficient microservices version. Stay tuned !
+[//]: # ([![last_version]&#40;https://img.shields.io/badge/last_version-v3.2.5-blue.svg?style=flat&#41;]&#40;https://github.com/shopizer-ecommerce/shopizer/tree/3.2.5&#41;)
 
-[![last_version](https://img.shields.io/badge/last_version-v3.2.5-blue.svg?style=flat)](https://github.com/shopizer-ecommerce/shopizer/tree/3.2.5)
-[![Official site](https://img.shields.io/website-up-down-green-red/https/shields.io.svg?label=official%20site)](http://www.shopizer.com/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/shopizerecomm/shopizer.svg)](https://hub.docker.com/r/shopizerecomm/shopizer)
-[![stackoverflow](https://img.shields.io/badge/shopizer-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/shopizer)
-[![CircleCI](https://circleci.com/gh/shopizer-ecommerce/shopizer.svg?style=svg)](https://circleci.com/gh/shopizer-ecommerce/shopizer)
+[//]: # ([![Official site]&#40;https://img.shields.io/website-up-down-green-red/https/shields.io.svg?label=official%20site&#41;]&#40;http://www.shopizer.com/&#41;)
+
+[//]: # ([![Docker Pulls]&#40;https://img.shields.io/docker/pulls/shopizerecomm/shopizer.svg&#41;]&#40;https://hub.docker.com/r/shopizerecomm/shopizer&#41;)
+
+[//]: # ([![stackoverflow]&#40;https://img.shields.io/badge/shopizer-stackoverflow-orange.svg?style=flat&#41;]&#40;http://stackoverflow.com/questions/tagged/shopizer&#41;)
+
+[//]: # ([![CircleCI]&#40;https://circleci.com/gh/shopizer-ecommerce/shopizer.svg?style=svg&#41;]&#40;https://circleci.com/gh/shopizer-ecommerce/shopizer&#41;)
 
 
 Java open source e-commerce software

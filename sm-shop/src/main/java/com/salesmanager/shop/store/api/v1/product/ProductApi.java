@@ -192,7 +192,7 @@ public class ProductApi {
 			@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "sku", required = false) String sku,
 			@RequestParam(value = "manufacturer", required = false) Long manufacturer,
-			@RequestParam(value = "optionValues", required = false) List<Long> optionValueIds,
+			@RequestParam(value = "option", required = false) List<String> options,
 			@RequestParam(value = "status", required = false) String status,
 			@RequestParam(value = "owner", required = false) Long owner,
 			@RequestParam(value = "page", required = false, defaultValue = "1") Integer page, // current
@@ -238,8 +238,8 @@ public class ProductApi {
 			criteria.setManufacturerId(manufacturer);
 		}
 
-		if (CollectionUtils.isNotEmpty(optionValueIds)) {
-			criteria.setOptionValueIds(optionValueIds);
+		if (CollectionUtils.isNotEmpty(options)) {
+			criteria.setOptions(options);
 		}
 
 		if (owner != null) {

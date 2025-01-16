@@ -248,13 +248,11 @@ public class ProductNextGenTest extends com.salesmanager.test.common.AbstractSal
 	    
 	    //list products per color attribute
 	    Page<Product> listByOptionValue = productService.listByStore(store, en, productCriteria, 0, 5);
-	    productCriteria = new ProductCriteria();
-	    productCriteria.setOptionValueIds(Stream.of(nineHalf.getId())
-	    	      .collect(Collectors.toList()));
+//	    productCriteria = new ProductCriteria();
+//	    productCriteria.setOptionValues(Stream.of(nineHalf.getCode() + ":" + nineHalf.get)
+//	    	      .collect(Collectors.toList()));
 	    List<Product> productsByOption = listByOptionValue.getContent();
 	    assertThat(productsByOption,  not(empty()));
-	    
-	    
 
 	}
 	

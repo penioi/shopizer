@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -641,7 +642,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		//attribute or option values
 		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
 				&& CollectionUtils.isNotEmpty(criteria.getAttributeCriteria()) 
-				|| CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+				|| CollectionUtils.isNotEmpty(criteria.getOptions())) {
 
 			countBuilderSelect.append(" INNER JOIN p.attributes pattr");
 			countBuilderSelect.append(" INNER JOIN pattr.productOption po");
@@ -663,8 +664,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				}
 			}
 			
-			if(CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-				countBuilderWhere.append(" and pov.id in (:povid)");
+			if(CollectionUtils.isNotEmpty(criteria.getOptions())) {
+				countBuilderWhere.append(" and lower(pov.code) in (:povCodes)");
 			}
 		}
 
@@ -690,8 +691,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		/**/
 		if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-			countQ.setParameter("povid", criteria.getOptionValueIds());
+				&& CollectionUtils.isNotEmpty(criteria.getOptions())) {
+			countQ.setParameter("povCodes", criteria.getOptions().stream().map(String::toLowerCase).collect(Collectors.toList()));
 		}
 
 		if (criteria.getAvailable() != null) {
@@ -887,14 +888,14 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		/**/
 		if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-			qs.append(" and pov.id in (:povid)");
+				&& CollectionUtils.isNotEmpty(criteria.getOptions())) {
+			qs.append(" and lower(pov.code) in (:povCodes)");
 		}
 		
 		qs.append(" order by p.sortOrder asc");
 
 		String hql = qs.toString();
-		Query q = this.em.createQuery(hql);
+		final Query q = this.em.createQuery(hql);
 
 		if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
 			q.setParameter("lang", language.getCode());
@@ -907,8 +908,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		/**/
 		if (criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
-				&& CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
-			q.setParameter("povid", criteria.getOptionValueIds());
+				&& CollectionUtils.isNotEmpty(criteria.getOptions())) {
+			q.setParameter("povCodes", criteria.getOptions().stream().map(String::toLowerCase).collect(Collectors.toList()));
 		}
 
 		if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
@@ -962,7 +963,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	    GenericEntityList entityList = new GenericEntityList();
 	    entityList.setTotalCount(count.intValue());
 
-		q = RepositoryHelper.paginateQuery(q, count, entityList, criteria);
+		RepositoryHelper.paginateQuery(q, count, entityList, criteria);
 
 
 		@SuppressWarnings("unchecked")

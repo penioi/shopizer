@@ -20,7 +20,7 @@ public class ProductCriteria extends Criteria {
 	private List<Long> categoryIds;
 	private List<String> availabilities;
 	private List<Long> productIds;
-	private List<Long> optionValueIds;
+	private List<String> options;
 	private String sku;
 	
 	//V2
@@ -106,12 +106,12 @@ public class ProductCriteria extends Criteria {
 		this.ownerId = ownerId;
 	}
 
-	public List<Long> getOptionValueIds() {
-		return optionValueIds;
+	public List<String> getOptions() {
+		return options;
 	}
 
-	public void setOptionValueIds(List<Long> optionValueIds) {
-		this.optionValueIds = optionValueIds;
+	public void setOptions(List<String> options) {
+		this.options = options;
 	}
 
 	public String getOrigin() {
@@ -145,7 +145,4 @@ public class ProductCriteria extends Criteria {
 	public void setSku(String sku) {
 		this.sku = sku;
 	}
-
-
-
 }

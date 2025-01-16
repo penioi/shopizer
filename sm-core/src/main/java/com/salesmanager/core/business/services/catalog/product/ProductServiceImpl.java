@@ -355,7 +355,7 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		
 		ProductList productList = productRepository.listByStore(store, language, criteria);
 		
-		PageRequest pageRequest = PageRequest.of(page - 1, count);
+		PageRequest pageRequest = PageRequest.of(page, count);
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		Page<Product> p = new PageImpl(productList.getProducts(),pageRequest, productList.getTotalCount());

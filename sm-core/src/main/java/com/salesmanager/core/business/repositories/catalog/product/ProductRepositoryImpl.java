@@ -584,7 +584,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		ProductList productList = new ProductList();
 
 		StringBuilder countBuilderSelect = new StringBuilder();
-		countBuilderSelect.append("select count(distinct p) from Product as p");
+		countBuilderSelect.append("select distinct p.id from Product as p");
 
 		StringBuilder countBuilderWhere = new StringBuilder();
 		countBuilderWhere.append(" where p.merchantStore.id=:mId");
@@ -677,9 +677,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			}
 		}
 		
-		
+		if( !criteria.getOptions().isEmpty() ) {
+			countBuilderWhere.append(" group by p.id having count(pov) = :requiredOptionsCount");
+		}
 
-		Query countQ = this.em.createQuery(countBuilderSelect.toString() + countBuilderWhere.toString());
+
+		Query countQ = this.em.createQuery(countBuilderSelect.toString() + countBuilderWhere.toString()  + " order by p.sortOrder asc");
 
 		countQ.setParameter("mId", store.getId());
 
@@ -693,6 +696,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		if(criteria.getOrigin().equals(ProductCriteria.ORIGIN_SHOP) 
 				&& CollectionUtils.isNotEmpty(criteria.getOptions())) {
 			countQ.setParameter("povCodes", criteria.getOptions().stream().map(String::toLowerCase).collect(Collectors.toList()));
+			countQ.setParameter("requiredOptionsCount", (long) criteria.getOptions().size());
 		}
 
 		if (criteria.getAvailable() != null) {
@@ -745,10 +749,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			countQ.setParameter("ownerid", criteria.getOwnerId());
 		}
 
-		Number count = (Number) countQ.getSingleResult();
-		productList.setTotalCount(count.intValue());
+		List<Long> productIds =  countQ.getResultList();
+		productList.setTotalCount(productIds.size());
 
-		if (count.intValue() == 0)
+		if (productList.getTotalCount() == 0)
 			return productList;
 
 		StringBuilder qs = new StringBuilder();
@@ -961,13 +965,17 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
 	    @SuppressWarnings("rawtypes")
 	    GenericEntityList entityList = new GenericEntityList();
-	    entityList.setTotalCount(count.intValue());
+	    entityList.setTotalCount(productList.getTotalCount());
 
-		RepositoryHelper.paginateQuery(q, count, entityList, criteria);
+
+		Query queryById = em.createQuery("select p from Product p where p.id in (:productIds)");
+		queryById.setParameter("productIds", productIds);
+
+		RepositoryHelper.paginateQuery(queryById, productList.getTotalCount(), entityList, criteria);
 
 
 		@SuppressWarnings("unchecked")
-		List<Product> products = q.getResultList();
+		List<Product> products = queryById.getResultList();
 		productList.setProducts(products);
 
 		return productList;
